@@ -1,0 +1,47 @@
+TITLE:	Case Stage Manager
+LIB:	COHDEVDB
+ENTITY:	CSMHDRET00
+TITLE:	CSM Header Entity
+	COLUMN:	HDRDHRTKN
+	TYPE:	integer
+	TITLE:	CSM Header Token
+	COLUMN:	HDRCASTKN
+	TYPE:	integer
+	TITLE:	CSM Header Case Token
+	COLUMN:	HDRACTSTG
+	TYPE:	integer
+	TITLE:	CSM Header Active Stage
+ENTITY:	CSMSTGET00
+TITLE:	CSM Stage Entity
+	COLUMN:	STGSTGTKN
+	TYPE:	integer
+	TITLE:	CSM Stage Token
+	COLUMN:	STGHDRTKN
+	TYPE:	integer
+	TITLE:	CSM Header Token
+	COLUMN:	STGTXT
+	TYPE:	varchar(256)
+	TITLE:	CSM Stage Title
+ENTITY:	CSMSTPET00
+TITLE:	CSM Step Entity
+	COLUMN:	STPSTPTKN
+	TYPE:	integer
+	TITLE:	CSM Step Token
+	COLUMN:	STPSTGTKN
+	TYPE:	integer
+	TITLE:	CSM Stage Token
+	COLUMN:	STPTYPE
+	TYPE:	varchar(256)
+	TITLE:	CSM Step Type
+	COLUMN:	STPTXT
+	TYPE:	varchar(256)
+	TITLE:	CSM Step Title
+	COLUMN:	STPSUBTXT
+	TYPE:	varchar(256)
+	TITLE:	CSM Step Sub Title
+	COLUMN:	STPSTS
+	TYPE:	integer
+	TITLE:	CSM Status
+	COLUMN:	STPPROP
+	TYPE:	varchar(16384)
+	TITLE:	CSM Step Properties
