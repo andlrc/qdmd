@@ -13,6 +13,12 @@ qdmd.lx.o:	qdmd.h y.tab.h qdmd.lx.l
 y.tab.h:	qdmd.g.o
 qdmd.o:	qdmd.c
 
+install:	qdmd
+	mv qdmd $(DESTDIR)/usr/bin/qdmd
+
+uninstall:
+	rm $(DESTDIR)/usr/bin/qdmd
+
 debug:	clean
 	$(MAKE) CFLAGS="$(DFLAGS)" YFLAGS="$(DYFLAGS)"
 
