@@ -8,8 +8,7 @@ extern int yyerror(const char *);
 extern FILE *yyin;
 static Q_entity_t *gen_entity(char *name, char *title, Q_columns_t *columns);
 static void add_entity(Q_dmd_t *dmd, Q_entity_t *entity);
-
-Q_dmd_t *dmd;
+static Q_dmd_t *dmd;
 %}
 
 %start root
