@@ -57,150 +57,150 @@ static void print_dmd(Q_dmd_t *dmd)
 
 	printf("{\n"
 	       "\t\"model\": {\n"
-	       "\t},\n"
-	       "\t\"proxy\": {\n"
-	       "\t\t\"url\": \"/ip2-services/ip2dmdProxy.aspx\"\n"
-	       "\t},\n"
-	       "\t\"entities\": {\n");
+	       "\t\t\"proxy\": {\n"
+	       "\t\t\t\"url\": \"/ip2-services/ip2dmdProxy.aspx\"\n"
+	       "\t\t},\n"
+	       "\t\t\"entities\": {\n");
 	for (i = 0; i < dmd->entlen; i++) {
 		ent = dmd->entities[i];
-		printf("\t\t\"%s\": {\n", ent->name);
+		printf("\t\t\t\"%s\": {\n", ent->name);
 		if (ent->title)
-			printf("\t\t\t\"title\": \"%s\",\n", ent->title);
-		printf("\t\t\t\"columns\": [\n");
+			printf("\t\t\t\t\"title\": \"%s\",\n", ent->title);
+		printf("\t\t\t\t\"columns\": [\n");
 		for (y = 0; y < ent->collen; y++) {
 			col = ent->columns[y];
 			gettyplen(type, &len, col->type);
-			printf("\t\t\t\t{\n"
-			       "\t\t\t\t\t\"type\": \"%s\",\n"
-			       "\t\t\t\t\t\"name\": \"%s\",\n"
-			       "\t\t\t\t\t\"title\": \"%s\"",
+			printf("\t\t\t\t\t{\n"
+			       "\t\t\t\t\t\t\"type\": \"%s\",\n"
+			       "\t\t\t\t\t\t\"name\": \"%s\",\n"
+			       "\t\t\t\t\t\t\"title\": \"%s\"",
 			       type, col->name, col->title);
 
 			if (len) {
-				printf(",\n\t\t\t\t\t\"len\": %d\n", len);
+				printf(",\n\t\t\t\t\t\t\"len\": %d\n", len);
 			} else {
 				printf("\n");
 			}
 
-			printf("\t\t\t\t}%s\n",
+			printf("\t\t\t\t\t}%s\n",
 			       y + 1 < ent->collen ? "," : "");
 		}
-		printf("\t\t\t],\n"
-		       "\t\t\t\"designer\": {\n"
-		       "\t\t\t},\n"
-		       "\t\t\t\"ui\": {\n"
-		       "\t\t\t\t\"grids\": {\n"
-		       "\t\t\t\t\t\"portfolio\": {\n"
-		       "\t\t\t\t\t\t\"columns\": [\n");
+		printf("\t\t\t\t],\n"
+		       "\t\t\t\t\"designer\": {\n"
+		       "\t\t\t\t},\n"
+		       "\t\t\t\t\"ui\": {\n"
+		       "\t\t\t\t\t\"grids\": {\n"
+		       "\t\t\t\t\t\t\"portfolio\": {\n"
+		       "\t\t\t\t\t\t\t\"columns\": [\n");
 		for (y = 0; y < ent->collen; y++) {
 			col = ent->columns[y];
-			printf("\t\t\t\t\t\t\t{\n");
-			printf("\t\t\t\t\t\t\t\t\"name\": \"%s\",\n"
-			       "\t\t\t\t\t\t\t\t\"title\": \"%s\",\n"
-			       "\t\t\t\t\t\t\t\t\"showned\": true,\n"
-			       "\t\t\t\t\t\t\t\t\"hidden\": false,\n"
-			       "\t\t\t\t\t\t\t\t\"width\": 100,\n"
-			       "\t\t\t\t\t\t\t\t\"isTitle\": false\n"
-			       "\t\t\t\t\t\t\t}%s\n",
+			printf("\t\t\t\t\t\t\t\t{\n");
+			printf("\t\t\t\t\t\t\t\t\t\"name\": \"%s\",\n"
+			       "\t\t\t\t\t\t\t\t\t\"title\": \"%s\",\n"
+			       "\t\t\t\t\t\t\t\t\t\"showned\": true,\n"
+			       "\t\t\t\t\t\t\t\t\t\"hidden\": false,\n"
+			       "\t\t\t\t\t\t\t\t\t\"width\": 100,\n"
+			       "\t\t\t\t\t\t\t\t\t\"isTitle\": false\n"
+			       "\t\t\t\t\t\t\t\t}%s\n",
 			       col->name, col->title,
 			       y + 1 < ent->collen ? "," : "");
 		}
-		printf("\t\t\t\t\t\t]\n"
-		       "\t\t\t\t\t}\n"
-		       "\t\t\t\t},\n"
-		       "\t\t\t\t\"forms\": {\n"
-		       "\t\t\t\t\t\"portfolio\": {\n"
-		       "\t\t\t\t\t\t\"columns\": [\n");
+		printf("\t\t\t\t\t\t\t]\n"
+		       "\t\t\t\t\t\t}\n"
+		       "\t\t\t\t\t},\n"
+		       "\t\t\t\t\t\"forms\": {\n"
+		       "\t\t\t\t\t\t\"portfolio\": {\n"
+		       "\t\t\t\t\t\t\t\"columns\": [\n");
 		for (y = 0; y < ent->collen; y++) {
 			col = ent->columns[y];
-			printf("\t\t\t\t\t\t\t{\n");
-			printf("\t\t\t\t\t\t\t\t\"name\": \"%s\"\n"
-			       "\t\t\t\t\t\t\t}%s\n",
+			printf("\t\t\t\t\t\t\t\t{\n");
+			printf("\t\t\t\t\t\t\t\t\t\"name\": \"%s\"\n"
+			       "\t\t\t\t\t\t\t\t}%s\n",
 			       col->name,
 			       y + 1 < ent->collen ? "," : "");
 		}
-		printf("\t\t\t\t\t\t],\n"
-		       "\t\t\t\t\t\t\"items\": {\n"
-		       "\t\t\t\t\t\t\t\"columns\": [\n");
+		printf("\t\t\t\t\t\t\t],\n"
+		       "\t\t\t\t\t\t\t\"items\": {\n"
+		       "\t\t\t\t\t\t\t\t\"columns\": [\n");
 		for (y = 0; y < ent->collen; y++) {
 			col = ent->columns[y];
 			gettyplen(type, &len, col->type);
 			if (strcmp(type, "integer") == 0)
 				strcpy(type, "number");
 
-			printf("\t\t\t\t\t\t\t\t{\n"
-			       "\t\t\t\t\t\t\t\t\t\"name\": \"%s\",\n"
-			       "\t\t\t\t\t\t\t\t\t\"type\": \"%s\",\n"
-			       "\t\t\t\t\t\t\t\t\t\"title\": \"%s\",\n"
-			       "\t\t\t\t\t\t\t\t\t\"fieldLabel\": \"%s\",\n"
-			       "\t\t\t\t\t\t\t\t\t\"syncEvent\": \"change\"",
+			printf("\t\t\t\t\t\t\t\t\t{\n"
+			       "\t\t\t\t\t\t\t\t\t\t\"name\": \"%s\",\n"
+			       "\t\t\t\t\t\t\t\t\t\t\"type\": \"%s\",\n"
+			       "\t\t\t\t\t\t\t\t\t\t\"title\": \"%s\",\n"
+			       "\t\t\t\t\t\t\t\t\t\t\"fieldLabel\": \"%s\",\n"
+			       "\t\t\t\t\t\t\t\t\t\t\"syncEvent\": \"change\"",
 			       col->name, type, col->title, col->title);
 
 			if (len) {
-				printf(",\n\t\t\t\t\t\t\t\t\t\"len\": %d\n",
+				printf(",\n\t\t\t\t\t\t\t\t\t\t\"len\": %d\n",
 				       len);
 			} else {
 				printf("\n");
 			}
 
 
-			printf("\t\t\t\t\t\t\t\t}%s\n",
+			printf("\t\t\t\t\t\t\t\t\t}%s\n",
 			       y + 1 < ent->collen ? "," : "");
 		}
-		printf("\t\t\t\t\t\t\t]\n"
-		       "\t\t\t\t\t\t},\n"
-		       "\t\t\t\t\t\t\"groups\": {\n"
-		       "\t\t\t\t\t\t\t\"system\": {\n"
-		       "\t\t\t\t\t\t\t\t\"name\": \"system\",\n"
-		       "\t\t\t\t\t\t\t\t\"title\": {\n"
-		       "\t\t\t\t\t\t\t\t\t\"da\": \"System\",\n"
-		       "\t\t\t\t\t\t\t\t\t\"en\": \"System\"\n"
+		printf("\t\t\t\t\t\t\t\t]\n"
+		       "\t\t\t\t\t\t\t},\n"
+		       "\t\t\t\t\t\t\t\"groups\": {\n"
+		       "\t\t\t\t\t\t\t\t\"system\": {\n"
+		       "\t\t\t\t\t\t\t\t\t\"name\": \"system\",\n"
+		       "\t\t\t\t\t\t\t\t\t\"title\": {\n"
+		       "\t\t\t\t\t\t\t\t\t\t\"da\": \"System\",\n"
+		       "\t\t\t\t\t\t\t\t\t\t\"en\": \"System\"\n"
+		       "\t\t\t\t\t\t\t\t\t}\n"
 		       "\t\t\t\t\t\t\t\t}\n"
 		       "\t\t\t\t\t\t\t}\n"
 		       "\t\t\t\t\t\t}\n"
 		       "\t\t\t\t\t}\n"
-		       "\t\t\t\t}\n"
-		       "\t\t\t},\n");
-		printf("\t\t\t\"idColumn\": \"%s\",\n",
+		       "\t\t\t\t},\n");
+		printf("\t\t\t\t\"idColumn\": \"%s\",\n",
 		       ent->columns[0]->name);
-		printf("\t\t\t\"widgets\": {\n"
-		       "\t\t\t},\n"
-		       "\t\t\t\"permission\": {\n"
-		       "\t\t\t\t\"add\": {\n"
-		       "\t\t\t\t\t\"form\": true,\n"
-		       "\t\t\t\t\t\"grid\": true\n"
+		printf("\t\t\t\t\"widgets\": {\n"
 		       "\t\t\t\t},\n"
-		       "\t\t\t\t\"edit\": {\n"
-		       "\t\t\t\t\t\"form\": true,\n"
-		       "\t\t\t\t\t\"grid\": true\n"
-		       "\t\t\t\t},\n"
-		       "\t\t\t\t\"remove\": {\n"
-		       "\t\t\t\t\t\"form\": true,\n"
-		       "\t\t\t\t\t\"grid\": true\n"
+		       "\t\t\t\t\"permission\": {\n"
+		       "\t\t\t\t\t\"add\": {\n"
+		       "\t\t\t\t\t\t\"form\": true,\n"
+		       "\t\t\t\t\t\t\"grid\": true\n"
+		       "\t\t\t\t\t},\n"
+		       "\t\t\t\t\t\"edit\": {\n"
+		       "\t\t\t\t\t\t\"form\": true,\n"
+		       "\t\t\t\t\t\t\"grid\": true\n"
+		       "\t\t\t\t\t},\n"
+		       "\t\t\t\t\t\"remove\": {\n"
+		       "\t\t\t\t\t\t\"form\": true,\n"
+		       "\t\t\t\t\t\t\"grid\": true\n"
+		       "\t\t\t\t\t}\n"
 		       "\t\t\t\t}\n"
-		       "\t\t\t}\n"
-		       "\t\t}%s\n", i + 1 < dmd->entlen ? "," : "");
+		       "\t\t\t}%s\n", i + 1 < dmd->entlen ? "," : "");
 	}
-	printf("\t},\n"
-	       "\t\"types\": {\n"
-	       "\t},\n"
-	       "\t\"relations\": {\n"
-	       "\t},\n"
-	       "\t\"languages\": {\n"
-	       "\t},\n"
-	       "\t\"navigator\": {\n"
-	       "\t},\n"
-	       "\t\"menu\": {\n"
-	       "\t},\n"
-	       "\t\"designer\": {\n"
-	       "\t},\n"
-	       "\t\"name\": \"%s\",\n"
-	       "\t\"title\": {\n"
-	       "\t\t\"da\": \"%s\"\n"
-	       "\t},\n"
-	       "\t\"require\": [\n"
-	       "\t]\n"
+	printf("\t\t},\n"
+	       "\t\t\"types\": {\n"
+	       "\t\t},\n"
+	       "\t\t\"relations\": {\n"
+	       "\t\t},\n"
+	       "\t\t\"languages\": {\n"
+	       "\t\t},\n"
+	       "\t\t\"navigator\": {\n"
+	       "\t\t},\n"
+	       "\t\t\"menu\": {\n"
+	       "\t\t},\n"
+	       "\t\t\"designer\": {\n"
+	       "\t\t},\n"
+	       "\t\t\"name\": \"%s\",\n"
+	       "\t\t\"title\": {\n"
+	       "\t\t\t\"da\": \"%s\"\n"
+	       "\t\t},\n"
+	       "\t\t\"require\": [\n"
+	       "\t\t]\n"
+	       "\t}\n"
 	       "}\n",
 	       dmd->lib, dmd->title);
 }
