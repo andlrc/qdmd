@@ -1,6 +1,7 @@
 %{
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "qdmd.h"
 
 extern int yylex();
@@ -8,7 +9,8 @@ extern int yyerror(const char *);
 extern FILE *yyin;
 static Q_entity_t *gen_entity(char *name, char *title, Q_columns_t *columns);
 static void add_entity(Q_dmd_t *dmd, Q_entity_t *entity);
-static Q_dmd_t *dmd;
+
+static Q_dmd_t *root_dmd;
 %}
 
 %start root
@@ -34,12 +36,12 @@ static Q_dmd_t *dmd;
 %%
 
 root
-	: title		{ dmd->title = $1; }
-	| lib		{ dmd->lib = $1; }
-	| entity	{ add_entity(dmd, $1); }
-	| root title	{ dmd->title = $2; }
-	| root lib	{ dmd->lib = $2; }
-	| root entity	{ add_entity(dmd, $2); }
+	: title		{ root_dmd->title = $1; }
+	| lib		{ root_dmd->lib = $1; }
+	| entity	{ add_entity(root_dmd, $1); }
+	| root title	{ root_dmd->title = $2; }
+	| root lib	{ root_dmd->lib = $2; }
+	| root entity	{ add_entity(root_dmd, $2); }
 
 title
 	: TITLE ':' TEXT nl	{ $$ = $3; }
@@ -136,15 +138,37 @@ static void add_entity(Q_dmd_t *dmd, Q_entity_t *entity)
 	dmd->entities[dmd->entlen++] = entity;
 }
 
-Q_dmd_t *Q_parse(FILE *fp)
+
+static Q_dmd_t *parse(FILE *fp)
 {
-	if (!(dmd = malloc(sizeof(Q_dmd_t)))) {
+	if (!(root_dmd = malloc(sizeof(Q_dmd_t)))) {
 		perror("malloc");
 		exit(EXIT_FAILURE);
 	}
 
 	yyin = fp;
 	yyparse();
+
+	return root_dmd;
+}
+
+Q_dmd_t *Q_parsefile(char *fname)
+{
+	Q_dmd_t *dmd = 0;
+	FILE *fp;
+
+	Q_setfilename(fname);
+
+	if (strcmp(fname, "-") == 0) {
+		dmd = parse(stdin);
+	} else {
+		if (!(fp = fopen(fname, "r"))) {
+			perror(fname);
+		} else {
+			dmd = parse(fp);
+			fclose(fp);
+		}
+	}
 
 	return dmd;
 }

@@ -4,6 +4,7 @@
 
 static void count();
 static int prev_state = 0;
+static char *cur_file;
 %}
 
 %x XENTITY XTEXT
@@ -26,13 +27,12 @@ nl	\r?\n
 
 %%
 
-int column = 0,
-    line = 1;
+static int column = 0, line = 1;
 static void count()
 {
 	int i;
 #ifdef QDMD_DEBUG
-	printf(">>%s<<\n", yytext);
+	fprintf(stderr, ">>%s<<\n", yytext);
 #endif
 	for (i = 0; yytext[i] != '\0'; i++) {
 		if (yytext[i] == '\n') {
@@ -48,10 +48,19 @@ static void count()
 	}
 }
 
+void Q_setfilename(char *fname)
+{
+	column = 0;
+	line = 1;
+	prev_state = INITIAL;
+	BEGIN(INITIAL);
+	cur_file = fname;
+}
+
 void yyerror(const char *err)
 {
 	fprintf(stderr,
 		"%s:%d:%d %s\n",
-		"INPUT_FILE",
+		cur_file,
 		line, column, err);
 }

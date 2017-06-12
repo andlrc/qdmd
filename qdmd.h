@@ -26,7 +26,8 @@ typedef struct {
 	int entlen;
 } Q_dmd_t;
 
+void Q_setfilename(char *fname);
 void Q_free(Q_dmd_t *dmd);
-Q_dmd_t *Q_parse(FILE *fp);
+Q_dmd_t *Q_parsefile(char *fname);
 
 #endif

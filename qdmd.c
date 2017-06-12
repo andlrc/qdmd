@@ -29,7 +29,6 @@ int main(int argc, char **argv)
 {
 	Q_dmd_t *dmd;
 	char *infile;
-	FILE *fp;
 	int argind;
 
 	argind = 1;
@@ -39,19 +38,11 @@ int main(int argc, char **argv)
 		if (argind < argc)
 			infile = argv[argind];
 
-		if (strcmp(infile, "-") == 0) {
-			dmd = Q_parse(stdin);
+		if ((dmd = Q_parsefile(infile))) {
 			print_dmd(dmd);
-			//Q_free(dmd);
-		} else {
-			if (!(fp = fopen(infile, "r"))) {
-				perror(infile);
-			} else {
-				dmd = Q_parse(fp);
-				print_dmd(dmd);
-				//Q_free(dmd);
-			}
+			Q_free(dmd);
 		}
+
 	} while (++argind < argc);
 
 	return 0;
