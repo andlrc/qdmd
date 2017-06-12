@@ -37,7 +37,7 @@ static char short_options[] = "ihV";
 
 static int getoutfile(char *outfile, size_t size, char *infile);
 static int gettyplen(char *type, int *len, char *enttype);
-static void print_dmd(FILE *fp, Q_dmd_t * dmd);
+static void print_dmd(FILE * fp, Q_dmd_t * dmd);
 
 int main(int argc, char **argv)
 {
@@ -47,7 +47,7 @@ int main(int argc, char **argv)
 	char *infile, outfile[PATH_MAX];
 
 	while ((c = getopt_long(argc, argv, short_options, long_options,
-				 NULL)) != -1) {
+				NULL)) != -1) {
 		switch (c) {
 		case 'V':
 			print_version();
@@ -76,7 +76,8 @@ int main(int argc, char **argv)
 
 		if ((dmd = Q_parsefile(infile))) {
 			if (strcmp(infile, "-") != 0 && iflag) {
-				if (getoutfile(outfile, sizeof(outfile), infile)) {
+				if (getoutfile(outfile,
+					       sizeof(outfile), infile)) {
 					fprintf(stderr,
 						"Failed to convert '%s' using stdout instead\n",
 						infile);
@@ -89,7 +90,7 @@ int main(int argc, char **argv)
 				print_dmd(outfp, dmd);
 				fclose(outfp);
 			} else {
-print_stdout:
+			      print_stdout:
 				print_dmd(stdout, dmd);
 			}
 			Q_free(dmd);
@@ -110,7 +111,7 @@ static int getoutfile(char *outfile, size_t size, char *infile)
 	if (!lastdot)
 		return 1;
 
-	reqsize = lastdot - infile + 4; /* dmd + \0 */
+	reqsize = lastdot - infile + 4;	/* dmd + \0 */
 
 	if (size < reqsize)
 		return 1;
@@ -142,10 +143,11 @@ static int gettyplen(char *type, int *len, char *enttype)
 	return 0;
 }
 
-static void print_dmd(FILE *fp, Q_dmd_t * dmd)
+static void print_dmd(FILE * fp, Q_dmd_t * dmd)
 {
 	Q_entity_t *ent;
 	Q_column_t *col;
+	Q_relation_t *rel;
 	int i, y, len;
 	char type[32];
 
@@ -277,8 +279,36 @@ static void print_dmd(FILE *fp, Q_dmd_t * dmd)
 	fprintf(fp, "\t\t},\n"
 		"\t\t\"types\": {\n"
 		"\t\t},\n"
-		"\t\t\"relations\": {\n"
-		"\t\t},\n"
+		"\t\t\"relations\": [\n");
+	for (i = 0; i < dmd->rellen; i++) {
+		rel = dmd->relations[i];
+		fprintf(fp, "\t\t\t{\n"
+			"\t\t\t\t\"between\": {\n"
+			"\t\t\t\t\t\"entity\": \"%s\",\n"
+			"\t\t\t\t\t\"on\": [\n"
+			"\t\t\t\t\t\t{\n"
+			"\t\t\t\t\t\t\t\"name\": \"%s\"\n"
+			"\t\t\t\t\t\t}\n"
+			"\t\t\t\t\t],\n"
+			"\t\t\t\t\t\"occurrence\": \"%s\"\n"
+			"\t\t\t\t},\n"
+			"\t\t\t\t\"and\": {\n"
+			"\t\t\t\t\t\"entity\": \"%s\",\n"
+			"\t\t\t\t\t\"on\": [\n"
+			"\t\t\t\t\t\t{\n"
+			"\t\t\t\t\t\t\t\"name\": \"%s\"\n"
+			"\t\t\t\t\t\t}\n"
+			"\t\t\t\t\t],\n"
+			"\t\t\t\t\t\"occurrence\": \"%s\"\n"
+			"\t\t\t\t}\n"
+			"\t\t\t}%s\n",
+			rel->atab, rel->acol,
+			rel->type & REL_TYPE_A_ONE ? "one" : "many",
+			rel->btab, rel->bcol,
+			rel->type & REL_TYPE_B_ONE ? "one" : "many",
+			i + 1 < dmd->rellen ? "," : "");
+	}
+	fprintf(fp, "\t\t],\n"
 		"\t\t\"languages\": {\n"
 		"\t\t},\n"
 		"\t\t\"navigator\": {\n"

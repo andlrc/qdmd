@@ -7,8 +7,14 @@
 extern int yylex();
 extern int yyerror(const char *);
 extern FILE *yyin;
-static Q_entity_t *gen_entity(char *name, char *title, Q_columns_t *columns);
-static void add_entity(Q_dmd_t *dmd, Q_entity_t *entity);
+
+static Q_entity_t *genentity(char *name, char *title, Q_columns_t *columns);
+static void addentity(Q_dmd_t *dmd, Q_entity_t *entity);
+
+static Q_relation_t *genrelation(char *atab, char *acol,
+				  char *btab, char *bcol,
+				  enum rel_type_e type);
+static void addrelation(Q_dmd_t *dmd, Q_relation_t *relation);
 
 static Q_dmd_t *root_dmd;
 %}
@@ -22,26 +28,30 @@ static Q_dmd_t *root_dmd;
 	Q_entity_t *entity;
 	Q_columns_t *columns;
 	Q_column_t *column;
+	Q_relation_t *relation;
 }
 
-%token TITLE LIB ENTITY COLUMN TYPE
-%token <str> TEXT
+%token TITLE LIB ENTITY COLUMN TYPE RELATION
+%token <str> TEXT IDENT
 %token NL
 
 %type <str> title lib
 %type <entity> entity
 %type <columns> columns
 %type <column> column column_props
+%type <relation> relation
 
 %%
 
 root
 	: title		{ root_dmd->title = $1; }
 	| lib		{ root_dmd->lib = $1; }
-	| entity	{ add_entity(root_dmd, $1); }
+	| entity	{ addentity(root_dmd, $1); }
+	| relation	{ addrelation(root_dmd, $1); }
 	| root title	{ root_dmd->title = $2; }
 	| root lib	{ root_dmd->lib = $2; }
-	| root entity	{ add_entity(root_dmd, $2); }
+	| root entity	{ addentity(root_dmd, $2); }
+	| root relation	{ addrelation(root_dmd, $2); }
 
 title
 	: TITLE ':' TEXT nl	{ $$ = $3; }
@@ -51,10 +61,10 @@ lib
 
 entity
 	: ENTITY ':' TEXT nl columns {
-		$$ = gen_entity($3, NULL, $5);
+		$$ = genentity($3, NULL, $5);
 	}
 	| ENTITY ':' TEXT nl TITLE ':' TEXT nl columns {
-		$$ = gen_entity($3, $7, $9);
+		$$ = genentity($3, $7, $9);
 	}
 
 columns
@@ -102,13 +112,27 @@ column_props
 		$$->type = $7;
 	}
 
+relation
+	: RELATION ':' IDENT '.' IDENT '=' IDENT '.' IDENT NL {
+		$$ = genrelation($3, $5, $7, $9, REL_TYPE_MANY_MANY);
+	}
+	| RELATION ':' IDENT '.' IDENT '-' IDENT '.' IDENT NL {
+		$$ = genrelation($3, $5, $7, $9, REL_TYPE_ONE_ONE);
+	}
+	| RELATION ':' IDENT '.' IDENT '<' '=' IDENT '.' IDENT NL {
+		$$ = genrelation($3, $5, $8, $10, REL_TYPE_ONE_MANY);
+	}
+	| RELATION ':' IDENT '.' IDENT '=' '>' IDENT '.' IDENT NL {
+		$$ = genrelation($3, $5, $8, $10, REL_TYPE_MANY_ONE);
+	}
+
 nl
 	: NL
 	| ';'
 
 %%
 
-static Q_entity_t *gen_entity(char *name, char *title, Q_columns_t *columns)
+static Q_entity_t *genentity(char *name, char *title, Q_columns_t *columns)
 {
 	Q_entity_t *ent;
 	if (!(ent = malloc(sizeof(Q_entity_t)))) {
@@ -125,7 +149,7 @@ static Q_entity_t *gen_entity(char *name, char *title, Q_columns_t *columns)
 	return ent;
 }
 
-static void add_entity(Q_dmd_t *dmd, Q_entity_t *entity)
+static void addentity(Q_dmd_t *dmd, Q_entity_t *entity)
 {
 	if (dmd->entities == NULL) {
 		if (!(dmd->entities = malloc(sizeof(Q_entity_t *) * 64))) {
@@ -138,6 +162,38 @@ static void add_entity(Q_dmd_t *dmd, Q_entity_t *entity)
 	dmd->entities[dmd->entlen++] = entity;
 }
 
+static Q_relation_t *genrelation(char *atab, char *acol,
+				  char *btab, char *bcol,
+				  enum rel_type_e type)
+{
+	Q_relation_t *rel;
+
+	if (!(rel = malloc(sizeof(Q_relation_t)))) {
+		perror("malloc");
+		exit(EXIT_FAILURE);
+	}
+
+	rel->atab = atab;
+	rel->acol = acol;
+	rel->btab = btab;
+	rel->bcol = bcol;
+	rel->type = type;
+
+	return rel;
+}
+static void addrelation(Q_dmd_t *dmd, Q_relation_t *relation)
+{
+	if (dmd->relations == NULL) {
+		if (!(dmd->relations = malloc(sizeof(Q_relation_t *) * 64))) {
+			perror("malloc");
+			exit(EXIT_FAILURE);
+		}
+		dmd->rellen = 0;
+	}
+
+	dmd->relations[dmd->rellen++] = relation;
+}
+
 
 static Q_dmd_t *parse(FILE *fp)
 {
@@ -145,6 +201,11 @@ static Q_dmd_t *parse(FILE *fp)
 		perror("malloc");
 		exit(EXIT_FAILURE);
 	}
+
+	root_dmd->title = 0;
+	root_dmd->lib = 0;
+	root_dmd->entlen = 0;
+	root_dmd->rellen = 0;
 
 	yyin = fp;
 	yyparse();
@@ -177,6 +238,7 @@ void Q_free(Q_dmd_t *dmd)
 {
 	Q_entity_t *ent;
 	Q_column_t *col;
+	Q_relation_t *rel;
 	int i, y;
 	for (i = 0; i < dmd->entlen; i++) {
 		ent = dmd->entities[i];
@@ -191,6 +253,14 @@ void Q_free(Q_dmd_t *dmd)
 		free(ent->title);
 		free(ent->columns);
 		free(ent);
+	}
+	for (i = 0; i < dmd->rellen; i++) {
+		rel = dmd->relations[i];
+		free(rel->atab);
+		free(rel->acol);
+		free(rel->btab);
+		free(rel->bcol);
+		free(rel);
 	}
 	free(dmd->title);
 	free(dmd->lib);

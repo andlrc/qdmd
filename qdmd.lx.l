@@ -7,20 +7,52 @@ static int prev_state = 0;
 static char *cur_file;
 %}
 
-%x XENTITY XTEXT
+%x XENTITY XREL XTEXT
 
+ident	[a-zA-Z_][a-zA-Z0-9_]*
 text	[^\t\n :]+[^\n]+
 ws	[\t ]
-nl	\r?\n
+nl	(\r?\n)+
 
 %%
 
-<INITIAL,XENTITY>"TITLE"	{ count(); BEGIN(XTEXT); return TITLE; }
+	/* Root */
+<INITIAL>"TITLE"		{ count(); BEGIN(XTEXT); return TITLE; }
 <INITIAL>"LIB"			{ count(); BEGIN(XTEXT); return LIB; }
-<INITIAL,XENTITY>"ENTITY"	{ count(); prev_state = XENTITY; BEGIN(XTEXT); return ENTITY; }
+
+	/* Entity */
+<INITIAL,XENTITY>"ENTITY"	{
+	count();
+	prev_state = XENTITY;
+	BEGIN(XTEXT);
+	return ENTITY;
+}
+<XENTITY>"TITLE"		{ count(); BEGIN(XTEXT); return TITLE; }
 <XENTITY>"COLUMN"		{ count(); BEGIN(XTEXT); return COLUMN; }
 <XENTITY>"TYPE"			{ count(); BEGIN(XTEXT); return TYPE; }
-<XTEXT>{text}			{ count(); yylval.str = strdup(yytext); BEGIN(prev_state); return TEXT; }
+
+	/* Relation */
+<INITIAL,XENTITY>"RELATION"	{
+	count();
+	BEGIN(XREL);
+	return RELATION;
+}
+<XREL>{ident}			{
+	count();
+	yylval.str = strdup(yytext);
+	return IDENT;
+}
+<XREL>{nl}			{ count(); BEGIN(INITIAL); return NL; }
+
+	/* Text */
+<XTEXT>{text}			{
+	count();
+	yylval.str = strdup(yytext);
+	BEGIN(prev_state);
+	return TEXT;
+}
+
+	/* Other */
 <*>{ws}				{ count(); }
 <*>{nl}				{ count(); return NL; }
 <*>.				{ count(); return yytext[0]; }
