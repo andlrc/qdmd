@@ -1,6 +1,9 @@
 #ifndef _H_QDMD_
 #define _H_QDMD_ 1
 
+#define PROGRAM_NAME "qdmd"
+#define PROGRAM_VERSION "0.2.0"
+
 typedef struct {
 	char *name;
 	char *type;
