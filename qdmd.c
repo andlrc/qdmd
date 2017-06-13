@@ -126,16 +126,20 @@ static int getoutfile(char *outfile, size_t size, char *infile)
 
 static int gettyplen(char *type, int *len, char *enttype)
 {
-	char *p;
+	char *p, *ptype;
 
-	for (p = enttype; *p != '\0' && *p != '('; p++) {
-		*type++ = *p;
+	for (ptype = type, p = enttype; *p != '\0' && *p != '('; p++) {
+		*ptype++ = *p;
 	}
 
 
+	*ptype = '\0';
 	if (*p++ == '(') {
-		*type = '\0';
 		*len = atoi(p);
+
+		if (*len >= 1024) {
+			strcpy(type, "textarea");
+		}
 	} else {
 		*len = 0;
 	}
@@ -196,7 +200,7 @@ static void print_dmd(FILE * fp, Q_dmd_t * dmd)
 				"\t\t\t\t\t\t\t\t\t\"title\": \"%s\",\n"
 				"\t\t\t\t\t\t\t\t\t\"showned\": true,\n"
 				"\t\t\t\t\t\t\t\t\t\"hidden\": false,\n"
-				"\t\t\t\t\t\t\t\t\t\"width\": 100,\n"
+				"\t\t\t\t\t\t\t\t\t\"flex\": 1,\n"
 				"\t\t\t\t\t\t\t\t\t\"isTitle\": false\n"
 				"\t\t\t\t\t\t\t\t}%s\n",
 				col->name, col->title,
@@ -228,8 +232,8 @@ static void print_dmd(FILE * fp, Q_dmd_t * dmd)
 				"\t\t\t\t\t\t\t\t\t\t\"name\": \"%s\",\n"
 				"\t\t\t\t\t\t\t\t\t\t\"type\": \"%s\",\n"
 				"\t\t\t\t\t\t\t\t\t\t\"title\": \"%s\",\n"
-				"\t\t\t\t\t\t\t\t\t\t\"fieldLabel\": \"%s\",\n"
-				"\t\t\t\t\t\t\t\t\t\t\"syncEvent\": \"change\"",
+				"\t\t\t\t\t\t\t\t\t\t\"anchor\": \"100%%\",\n"
+				"\t\t\t\t\t\t\t\t\t\t\"fieldLabel\": \"%s\"",
 				col->name, type, col->title, col->title);
 
 			if (len) {
@@ -245,15 +249,6 @@ static void print_dmd(FILE * fp, Q_dmd_t * dmd)
 				y + 1 < ent->collen ? "," : "");
 		}
 		fprintf(fp, "\t\t\t\t\t\t\t\t]\n"
-			"\t\t\t\t\t\t\t},\n"
-			"\t\t\t\t\t\t\t\"groups\": {\n"
-			"\t\t\t\t\t\t\t\t\"system\": {\n"
-			"\t\t\t\t\t\t\t\t\t\"name\": \"system\",\n"
-			"\t\t\t\t\t\t\t\t\t\"title\": {\n"
-			"\t\t\t\t\t\t\t\t\t\t\"da\": \"System\",\n"
-			"\t\t\t\t\t\t\t\t\t\t\"en\": \"System\"\n"
-			"\t\t\t\t\t\t\t\t\t}\n"
-			"\t\t\t\t\t\t\t\t}\n"
 			"\t\t\t\t\t\t\t}\n"
 			"\t\t\t\t\t\t}\n" "\t\t\t\t\t}\n" "\t\t\t\t},\n");
 		fprintf(fp, "\t\t\t\t\"idColumn\": \"%s\",\n",
@@ -300,6 +295,8 @@ static void print_dmd(FILE * fp, Q_dmd_t * dmd)
 			"\t\t\t\t\t\t}\n"
 			"\t\t\t\t\t],\n"
 			"\t\t\t\t\t\"occurrence\": \"%s\"\n"
+			"\t\t\t\t},\n"
+			"\t\t\t\t\"properties\": {\n"
 			"\t\t\t\t}\n"
 			"\t\t\t}%s\n",
 			rel->atab, rel->acol,
