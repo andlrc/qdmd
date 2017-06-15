@@ -250,7 +250,10 @@ static Q_dmd_t *parse(FILE *fp)
 	root_dmd->rellen = 0;
 
 	yyin = fp;
-	yyparse();
+	if (yyparse()) {
+		Q_free(root_dmd);
+		return NULL;
+	}
 
 	return root_dmd;
 }
