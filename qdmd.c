@@ -6,7 +6,6 @@
 #include "qdmd.h"
 #include "y.tab.h"
 
-
 static void print_version(void)
 {
 	printf("%s: %s\n", PROGRAM_NAME, PROGRAM_VERSION);
@@ -166,6 +165,17 @@ static void print_dmd(FILE * fp, Q_dmd_t * dmd)
 		if (ent->title)
 			fprintf(fp, "\t\t\t\t\"title\": \"%s\",\n",
 				ent->title);
+		fprintf(fp, "\t\t\t\t\"keys\": [\n");
+		for (y = 0; y < ent->idxlen; y++) {
+			fprintf(fp, "\t\t\t\t\t{\n"
+				"\t\t\t\t\t\t\"columns\": [\n"
+				"\t\t\t\t\t\t\t\"%s\"\n"
+				"\t\t\t\t\t\t]\n"
+				"\t\t\t\t\t}%s\n",
+				ent->indices[y],
+				y + 1 < ent->idxlen ? "," : "");
+		}
+		fprintf(fp, "\t\t\t\t],\n");
 		fprintf(fp, "\t\t\t\t\"columns\": [\n");
 		for (y = 0; y < ent->collen; y++) {
 			col = ent->columns[y];

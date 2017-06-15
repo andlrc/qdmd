@@ -8,8 +8,9 @@ extern int yylex();
 extern int yyerror(const char *);
 extern FILE *yyin;
 
-static Q_entity_t *genentity(char *name, char *title, Q_columns_t *columns);
+static Q_entity_t *genentity(void);
 static void addentity(Q_dmd_t *dmd, Q_entity_t *entity);
+static void addindex(Q_entity_t *ent, char *index);
 
 static Q_relation_t *genrelation(char *atab, char *acol,
 				  char *btab, char *bcol,
@@ -31,12 +32,12 @@ static Q_dmd_t *root_dmd;
 	Q_relation_t *relation;
 }
 
-%token TITLE LIB ENTITY COLUMN TYPE RELATION
+%token TITLE LIB ENTITY COLUMN TYPE RELATION INDEX
 %token <str> TEXT IDENT
 %token NL
 
 %type <str> title lib
-%type <entity> entity
+%type <entity> entity entity_props
 %type <columns> columns
 %type <column> column column_props
 %type <relation> relation
@@ -61,10 +62,36 @@ lib
 
 entity
 	: ENTITY ':' TEXT nl columns {
-		$$ = genentity($3, NULL, $5);
+		$$ = genentity();
+		$$->name = $3;
+		$$->columns = $5->columns;
+		$$->collen = $5->length;
+		free($5);
 	}
-	| ENTITY ':' TEXT nl TITLE ':' TEXT nl columns {
-		$$ = genentity($3, $7, $9);
+	| ENTITY ':' TEXT nl entity_props columns {
+		$$ = $5;
+		$$->name = $3;
+		$$->columns = $6->columns;
+		$$->collen = $6->length;
+		free($6);
+	}
+
+entity_props
+	: TITLE ':' TEXT nl {
+		$$ = genentity();
+		$$->title = $3;
+	}
+	| INDEX ':' TEXT nl {
+		$$ = genentity();
+		addindex($$, $3);
+	}
+	| entity_props TITLE ':' TEXT nl {
+		$$ = $1;
+		$$->title = $4;
+	}
+	| entity_props INDEX ':' TEXT nl {
+		$$ = $1;
+		addindex($$, $4);
 	}
 
 columns
@@ -132,7 +159,7 @@ nl
 
 %%
 
-static Q_entity_t *genentity(char *name, char *title, Q_columns_t *columns)
+static Q_entity_t *genentity(void)
 {
 	Q_entity_t *ent;
 	if (!(ent = malloc(sizeof(Q_entity_t)))) {
@@ -140,18 +167,19 @@ static Q_entity_t *genentity(char *name, char *title, Q_columns_t *columns)
 		exit(EXIT_FAILURE);
 	}
 
-	ent->name = name;
-	ent->title = title;
-	ent->columns = columns->columns;
-	ent->collen = columns->length;
-	free(columns);
+	ent->name = 0;
+	ent->title = 0;
+	ent->columns = 0;
+	ent->collen = 0;
+	ent->indices = 0;
+	ent->idxlen = 0;
 
 	return ent;
 }
 
 static void addentity(Q_dmd_t *dmd, Q_entity_t *entity)
 {
-	if (dmd->entities == NULL) {
+	if (!dmd->entities) {
 		if (!(dmd->entities = malloc(sizeof(Q_entity_t *) * 64))) {
 			perror("malloc");
 			exit(EXIT_FAILURE);
@@ -183,7 +211,7 @@ static Q_relation_t *genrelation(char *atab, char *acol,
 }
 static void addrelation(Q_dmd_t *dmd, Q_relation_t *relation)
 {
-	if (dmd->relations == NULL) {
+	if (!dmd->relations) {
 		if (!(dmd->relations = malloc(sizeof(Q_relation_t *) * 64))) {
 			perror("malloc");
 			exit(EXIT_FAILURE);
@@ -194,6 +222,18 @@ static void addrelation(Q_dmd_t *dmd, Q_relation_t *relation)
 	dmd->relations[dmd->rellen++] = relation;
 }
 
+static void addindex(Q_entity_t *ent, char *index)
+{
+	if (!ent->indices) {
+		if(!(ent->indices = malloc(sizeof(char *) * 16))) {
+			perror("malloc");
+			exit(EXIT_FAILURE);
+		}
+		ent->idxlen = 0;
+	}
+
+	ent->indices[ent->idxlen++] = index;
+}
 
 static Q_dmd_t *parse(FILE *fp)
 {
@@ -204,7 +244,9 @@ static Q_dmd_t *parse(FILE *fp)
 
 	root_dmd->title = 0;
 	root_dmd->lib = 0;
+	root_dmd->entities = 0;
 	root_dmd->entlen = 0;
+	root_dmd->relations = 0;
 	root_dmd->rellen = 0;
 
 	yyin = fp;
@@ -249,6 +291,10 @@ void Q_free(Q_dmd_t *dmd)
 			free(col->title);
 			free(col);
 		}
+		for (y = 0; y < ent->idxlen; y++) {
+			free(ent->indices[y]);
+		}
+		free(ent->indices);
 		free(ent->name);
 		free(ent->title);
 		free(ent->columns);
@@ -265,5 +311,6 @@ void Q_free(Q_dmd_t *dmd)
 	free(dmd->title);
 	free(dmd->lib);
 	free(dmd->entities);
+	free(dmd->relations);
 	free(dmd);
 }

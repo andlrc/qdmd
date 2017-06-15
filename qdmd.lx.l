@@ -28,6 +28,7 @@ nl	(\r?\n)+
 	return ENTITY;
 }
 <XENTITY>"TITLE"		{ count(); BEGIN(XTEXT); return TITLE; }
+<XENTITY>"INDEX"		{ count(); BEGIN(XTEXT); return INDEX; }
 <XENTITY>"COLUMN"		{ count(); BEGIN(XTEXT); return COLUMN; }
 <XENTITY>"TYPE"			{ count(); BEGIN(XTEXT); return TYPE; }
 
