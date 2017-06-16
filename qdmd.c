@@ -102,7 +102,7 @@ int main(int argc, char **argv)
 
 static int getoutfile(char *outfile, size_t size, char *infile)
 {
-	char *pin, *pout, *lastdot;
+	char *lastdot;
 	size_t reqsize;
 
 	lastdot = strrchr(infile, '.');
@@ -110,16 +110,13 @@ static int getoutfile(char *outfile, size_t size, char *infile)
 	if (!lastdot)
 		return 1;
 
-	reqsize = lastdot - infile + 4;	/* dmd + \0 */
+	reqsize = lastdot - infile + 5;	/* .dmd + \0 */
 
 	if (size < reqsize)
 		return 1;
 
-	for (pout = outfile, pin = infile; pin <= lastdot; pout++, pin++) {
-		*pout = *pin;
-	}
-
-	strcpy(pout, "dmd");
+	memcpy(outfile, infile, lastdot - infile);
+	memcpy(outfile + (lastdot - infile), ".dmd", 5);
 	return 0;
 }
 
@@ -151,7 +148,7 @@ static void print_dmd(FILE * fp, Q_dmd_t * dmd)
 	Q_entity_t *ent;
 	Q_column_t *col;
 	Q_relation_t *rel;
-	int i, y, len;
+	int i, j, len;
 	char type[32];
 
 	fprintf(fp, "{\n"
@@ -166,19 +163,19 @@ static void print_dmd(FILE * fp, Q_dmd_t * dmd)
 			fprintf(fp, "\t\t\t\t\"title\": \"%s\",\n",
 				ent->title);
 		fprintf(fp, "\t\t\t\t\"keys\": [\n");
-		for (y = 0; y < ent->idxlen; y++) {
+		for (j = 0; j < ent->idxlen; j++) {
 			fprintf(fp, "\t\t\t\t\t{\n"
 				"\t\t\t\t\t\t\"columns\": [\n"
 				"\t\t\t\t\t\t\t\"%s\"\n"
 				"\t\t\t\t\t\t]\n"
 				"\t\t\t\t\t}%s\n",
-				ent->indices[y],
-				y + 1 < ent->idxlen ? "," : "");
+				ent->indices[j],
+				j + 1 < ent->idxlen ? "," : "");
 		}
 		fprintf(fp, "\t\t\t\t],\n");
 		fprintf(fp, "\t\t\t\t\"columns\": [\n");
-		for (y = 0; y < ent->collen; y++) {
-			col = ent->columns[y];
+		for (j = 0; j < ent->collen; j++) {
+			col = ent->columns[j];
 			gettyplen(type, &len, col->type);
 			fprintf(fp, "\t\t\t\t\t{\n"
 				"\t\t\t\t\t\t\"type\": \"%s\",\n"
@@ -194,7 +191,7 @@ static void print_dmd(FILE * fp, Q_dmd_t * dmd)
 			}
 
 			fprintf(fp, "\t\t\t\t\t}%s\n",
-				y + 1 < ent->collen ? "," : "");
+				j + 1 < ent->collen ? "," : "");
 		}
 		fprintf(fp, "\t\t\t\t],\n"
 			"\t\t\t\t\"designer\": {\n"
@@ -203,8 +200,8 @@ static void print_dmd(FILE * fp, Q_dmd_t * dmd)
 			"\t\t\t\t\t\"grids\": {\n"
 			"\t\t\t\t\t\t\"portfolio\": {\n"
 			"\t\t\t\t\t\t\t\"columns\": [\n");
-		for (y = 0; y < ent->collen; y++) {
-			col = ent->columns[y];
+		for (j = 0; j < ent->collen; j++) {
+			col = ent->columns[j];
 			fprintf(fp, "\t\t\t\t\t\t\t\t{\n");
 			fprintf(fp, "\t\t\t\t\t\t\t\t\t\"name\": \"%s\",\n"
 				"\t\t\t\t\t\t\t\t\t\"title\": \"%s\",\n"
@@ -214,7 +211,7 @@ static void print_dmd(FILE * fp, Q_dmd_t * dmd)
 				"\t\t\t\t\t\t\t\t\t\"isTitle\": false\n"
 				"\t\t\t\t\t\t\t\t}%s\n",
 				col->name, col->title,
-				y + 1 < ent->collen ? "," : "");
+				j + 1 < ent->collen ? "," : "");
 		}
 		fprintf(fp, "\t\t\t\t\t\t\t]\n"
 			"\t\t\t\t\t\t}\n"
@@ -222,18 +219,18 @@ static void print_dmd(FILE * fp, Q_dmd_t * dmd)
 			"\t\t\t\t\t\"forms\": {\n"
 			"\t\t\t\t\t\t\"portfolio\": {\n"
 			"\t\t\t\t\t\t\t\"columns\": [\n");
-		for (y = 0; y < ent->collen; y++) {
-			col = ent->columns[y];
+		for (j = 0; j < ent->collen; j++) {
+			col = ent->columns[j];
 			fprintf(fp, "\t\t\t\t\t\t\t\t{\n");
 			fprintf(fp, "\t\t\t\t\t\t\t\t\t\"name\": \"%s\"\n"
 				"\t\t\t\t\t\t\t\t}%s\n",
-				col->name, y + 1 < ent->collen ? "," : "");
+				col->name, j + 1 < ent->collen ? "," : "");
 		}
 		fprintf(fp, "\t\t\t\t\t\t\t],\n"
 			"\t\t\t\t\t\t\t\"items\": {\n"
 			"\t\t\t\t\t\t\t\t\"columns\": [\n");
-		for (y = 0; y < ent->collen; y++) {
-			col = ent->columns[y];
+		for (j = 0; j < ent->collen; j++) {
+			col = ent->columns[j];
 			gettyplen(type, &len, col->type);
 			if (strcmp(type, "integer") == 0)
 				strcpy(type, "number");
@@ -256,7 +253,7 @@ static void print_dmd(FILE * fp, Q_dmd_t * dmd)
 
 
 			fprintf(fp, "\t\t\t\t\t\t\t\t\t}%s\n",
-				y + 1 < ent->collen ? "," : "");
+				j + 1 < ent->collen ? "," : "");
 		}
 		fprintf(fp, "\t\t\t\t\t\t\t\t]\n"
 			"\t\t\t\t\t\t\t}\n"
