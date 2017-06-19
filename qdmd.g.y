@@ -1,7 +1,7 @@
 %{
-#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include "safe.h"
 #include "qdmd.h"
 
 extern int yylex();
@@ -99,15 +99,8 @@ entity_props
 
 columns
 	: column {
-		if (!($$ = malloc(sizeof(Q_columns_t)))) {
-			perror("malloc");
-			exit(EXIT_FAILURE);
-		}
-		if (!($$->columns = malloc(sizeof(Q_column_t *) * 64))) {
-			perror("malloc");
-			free($$);
-			exit(EXIT_FAILURE);
-		}
+		$$ = smalloc(sizeof(Q_columns_t));
+		$$->columns = smalloc(sizeof(Q_column_t *) * 64);
 		$$->length = 0;
 		$$->columns[$$->length++] = $1;
 	}
@@ -124,19 +117,13 @@ column
 
 column_props
 	: TYPE ':' TEXT nl TITLE ':' TEXT nl {
-		if (!($$ = malloc(sizeof(Q_column_t)))) {
-			perror("malloc");
-			exit(EXIT_FAILURE);
-		}
+		$$ = smalloc(sizeof(Q_column_t));
 
 		$$->type = $3;
 		$$->title = $7;
 	}
 	| TITLE ':' TEXT nl TYPE ':' TEXT nl {
-		if (!($$ = malloc(sizeof(Q_column_t)))) {
-			perror("malloc");
-			exit(EXIT_FAILURE);
-		}
+		$$ = smalloc(sizeof(Q_column_t));
 
 		$$->title = $3;
 		$$->type = $7;
@@ -168,10 +155,7 @@ nl
 static Q_entity_t *genentity(void)
 {
 	Q_entity_t *ent;
-	if (!(ent = malloc(sizeof(Q_entity_t)))) {
-		perror("malloc");
-		exit(EXIT_FAILURE);
-	}
+	ent = smalloc(sizeof(Q_entity_t));
 
 	ent->name = 0;
 	ent->title = 0;
@@ -186,10 +170,7 @@ static Q_entity_t *genentity(void)
 static void addentity(Q_dmd_t *dmd, Q_entity_t *entity)
 {
 	if (!dmd->entities) {
-		if (!(dmd->entities = malloc(sizeof(Q_entity_t *) * 64))) {
-			perror("malloc");
-			exit(EXIT_FAILURE);
-		}
+		dmd->entities = smalloc(sizeof(Q_entity_t *) * 64);
 		dmd->entlen = 0;
 	}
 
@@ -202,11 +183,7 @@ static Q_relation_t *genrelation(char *atab, char *acol,
 {
 	Q_relation_t *rel;
 
-	if (!(rel = malloc(sizeof(Q_relation_t)))) {
-		perror("malloc");
-		exit(EXIT_FAILURE);
-	}
-
+	rel = smalloc(sizeof(Q_relation_t));
 	rel->atab = atab;
 	rel->acol = acol;
 	rel->btab = btab;
@@ -218,10 +195,7 @@ static Q_relation_t *genrelation(char *atab, char *acol,
 static void addrelation(Q_dmd_t *dmd, Q_relation_t *relation)
 {
 	if (!dmd->relations) {
-		if (!(dmd->relations = malloc(sizeof(Q_relation_t *) * 64))) {
-			perror("malloc");
-			exit(EXIT_FAILURE);
-		}
+		dmd->relations = smalloc(sizeof(Q_relation_t *) * 64);
 		dmd->rellen = 0;
 	}
 
@@ -231,10 +205,7 @@ static void addrelation(Q_dmd_t *dmd, Q_relation_t *relation)
 static void addindex(Q_entity_t *ent, char *index)
 {
 	if (!ent->indices) {
-		if(!(ent->indices = malloc(sizeof(char *) * 16))) {
-			perror("malloc");
-			exit(EXIT_FAILURE);
-		}
+		ent->indices = smalloc(sizeof(char *) * 16);
 		ent->idxlen = 0;
 	}
 
@@ -243,11 +214,7 @@ static void addindex(Q_entity_t *ent, char *index)
 
 static Q_dmd_t *parse(FILE *fp)
 {
-	if (!(root_dmd = malloc(sizeof(Q_dmd_t)))) {
-		perror("malloc");
-		exit(EXIT_FAILURE);
-	}
-
+	root_dmd = smalloc(sizeof(Q_dmd_t));
 	root_dmd->title = 0;
 	root_dmd->lib = 0;
 	root_dmd->entities = 0;

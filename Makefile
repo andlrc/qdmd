@@ -4,15 +4,16 @@ YFLAGS	= -d
 DYFLAGS	= -d -v
 LFLAGS	= --yylineno
 
-OFILES	= qdmd.o qdmd.g.o qdmd.lx.o
+OFILES	= qdmd.o qdmd.g.o qdmd.lx.o safe.o
 qdmd:	qdmd.h y.tab.h	$(OFILES)
 	$(CC) $(CFLAGS) -o qdmd $(OFILES) -lfl -ly
 
-qdmd.g.o:	qdmd.h qdmd.g.y
-qdmd.lx.o:	qdmd.h y.tab.h qdmd.lx.l
+qdmd.g.o:	safe.h qdmd.h qdmd.g.y
+qdmd.lx.o:	safe.h qdmd.h y.tab.h qdmd.lx.l
 
 y.tab.h:	qdmd.g.o
-qdmd.o:	qdmd.c
+safe.o:	safe.h safe.c
+qdmd.o:	qdmd.h qdmd.c
 
 install:	qdmd
 	mv qdmd $(DESTDIR)/usr/bin/qdmd

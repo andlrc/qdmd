@@ -1,5 +1,6 @@
 %{
 #include "qdmd.h"
+#include "safe.h"
 #include "y.tab.h"
 
 %}
@@ -32,7 +33,7 @@ nl	(\r?\n)+
 
 <XREL>{
 	":"		{ return yytext[0]; }
-	{ident}		{ yylval.str = strdup(yytext); return IDENT; }
+	{ident}		{ yylval.str = sstrdup(yytext); return IDENT; }
 	{nl}		{ yy_push_state(INITIAL); return NL; }
 }
 
@@ -40,7 +41,7 @@ nl	(\r?\n)+
 	{text}		{
 		for (;*yytext == '\t' || *yytext == ' '; yytext++)
 			/* Remove leading white spaces */;
-		yylval.str = strdup(yytext);
+		yylval.str = sstrdup(yytext);
 		yy_pop_state();
 		return TEXT;
 	}
