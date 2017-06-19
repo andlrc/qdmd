@@ -47,7 +47,8 @@ static Q_dmd_t *root_dmd;
 %%
 
 root
-	: title		{ root_dmd->title = $1; }
+	: nl root	/* Ignore */
+	| title		{ root_dmd->title = $1; }
 	| lib		{ root_dmd->lib = $1; }
 	| entity	{ addentity(root_dmd, $1); }
 	| relation	{ addrelation(root_dmd, $1); }
@@ -158,6 +159,9 @@ relation
 nl
 	: NL
 	| ';'
+	| NL nl
+	| ';' nl
+	
 
 %%
 

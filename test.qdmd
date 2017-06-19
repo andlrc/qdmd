@@ -1,3 +1,7 @@
+# Lines starting with ``#'' will be ignored
+# Statements are seperated by ``;'' or a newline
+# Whitespaces and empty lines are ignored
+
 TITLE:	Case Stage Manager
 LIB:	COHDEVDB
 

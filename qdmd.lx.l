@@ -7,6 +7,7 @@
 %option stack
 %x XENTITY XREL XTEXT
 
+comm	"#"[^\n]*[\n]
 ident	[a-zA-Z_][a-zA-Z0-9_]*
 text	[^\n;]+
 ws	[\t ]
@@ -48,6 +49,7 @@ nl	(\r?\n)+
 <*>{
 	{ws}		/* Nothing */
 	{nl}		{ return NL; }
+	{comm}		/* Comment */
 	":"		{ yy_push_state(XTEXT); return yytext[0]; }
 	.		{ return yytext[0]; }
 }
