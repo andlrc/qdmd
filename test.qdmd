@@ -1,18 +1,10 @@
 TITLE:	Case Stage Manager
 LIB:	COHDEVDB
 
-ENTITY:	CSMHDRET00
-TITLE:	CSM Header Entity
-INDEX:	HDRCASTKN
-	COLUMN:	HDRHDRTKN
-	TYPE:	integer
-	TITLE:	CSM Header Token
-	COLUMN:	HDRCASTKN
-	TYPE:	integer
-	TITLE:	CSM Header Case Token
-	COLUMN:	HDRACTSTG
-	TYPE:	integer
-	TITLE:	CSM Header Active Stage
+ENTITY:	CSMHDRET00; TITLE: CSM Header Entity; INDEX: HDRCASTKN
+	COLUMN: HDRHDRTKN; TYPE: integer; TITLE: CSM Header Token
+	COLUMN: HDRCASTKN; TYPE: integer; TITLE: CSM Header Case Token
+	COLUMN: HDRACTSTG; TYPE: integer; TITLE: CSM Header Active Stage
 
 ENTITY:	CSMSTGET00
 TITLE:	CSM Stage Entity

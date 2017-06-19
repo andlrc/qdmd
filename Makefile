@@ -2,6 +2,7 @@ CFLAGS	= -Wall -Werror -Wno-unused-function -O2
 DFLAGS	= -Wall -Werror -Wno-unused-function -g -DQDMD_DEBUG
 YFLAGS	= -d
 DYFLAGS	= -d -v
+LFLAGS	= --yylineno
 
 OFILES	= qdmd.o qdmd.g.o qdmd.lx.o
 qdmd:	qdmd.h y.tab.h	$(OFILES)

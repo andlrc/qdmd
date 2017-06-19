@@ -5,8 +5,9 @@
 #include "qdmd.h"
 
 extern int yylex();
-extern int yyerror(const char *);
 extern FILE *yyin;
+extern int yylineno;
+void yyerror(const char *err);
 
 static Q_entity_t *genentity(void);
 static void addentity(Q_dmd_t *dmd, Q_entity_t *entity);
@@ -17,6 +18,7 @@ static Q_relation_t *genrelation(char *atab, char *acol,
 				  enum rel_type_e type);
 static void addrelation(Q_dmd_t *dmd, Q_relation_t *relation);
 
+static char *root_file;
 static Q_dmd_t *root_dmd;
 %}
 
@@ -258,12 +260,19 @@ static Q_dmd_t *parse(FILE *fp)
 	return root_dmd;
 }
 
+void yyerror(const char *err)
+{
+	fprintf(stderr,
+		"%s:%d %s\n",
+		root_file, yylineno, err);
+}
+
 Q_dmd_t *Q_parsefile(char *fname)
 {
 	Q_dmd_t *dmd = 0;
 	FILE *fp;
 
-	Q_setfilename(fname);
+	root_file = fname;
 
 	if (strcmp(fname, "-") == 0) {
 		dmd = parse(stdin);
