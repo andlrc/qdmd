@@ -2,7 +2,7 @@
 #define _H_QDMD_ 1
 
 #define PROGRAM_NAME "qdmd"
-#define PROGRAM_VERSION "0.7.3"
+#define PROGRAM_VERSION "0.7.4"
 
 typedef struct {
 	char *name;
@@ -58,6 +58,16 @@ typedef struct {
 } Q_dmd_t;
 
 Q_dmd_t *Q_parsefile(char *fname);
-void Q_free(Q_dmd_t *dmd);
+
+Q_entity_t *Q_genentity(void);
+
+void Q_addentity(Q_dmd_t * dmd, Q_entity_t * entity);
+void Q_addindex(Q_entity_t * ent, char *index);
+
+Q_relation_t *Q_genrelation(char *atab, char *acol,
+			    char *btab, char *bcol, enum rel_type_e type);
+void Q_addrelation(Q_dmd_t * dmd, Q_relation_t * relation);
+
+void Q_free(Q_dmd_t * dmd);
 
 #endif

@@ -9,17 +9,11 @@ extern FILE *yyin;
 extern int yylineno;
 void yyerror(const char *err);
 
-static Q_entity_t *genentity(void);
-static void addentity(Q_dmd_t *dmd, Q_entity_t *entity);
-static void addindex(Q_entity_t *ent, char *index);
-
-static Q_relation_t *genrelation(char *atab, char *acol,
-				  char *btab, char *bcol,
-				  enum rel_type_e type);
-static void addrelation(Q_dmd_t *dmd, Q_relation_t *relation);
-
+/* Used by ``yyerror'' and the ``root'' rule in the parser.
+ * Reset whenever ``Q_parsefile'' is called */
 static char *root_file;
 static Q_dmd_t *root_dmd;
+
 %}
 
 %start root
@@ -50,12 +44,12 @@ root
 	: nl root	/* Ignore */
 	| title		{ root_dmd->title = $1; }
 	| lib		{ root_dmd->lib = $1; }
-	| entity	{ addentity(root_dmd, $1); }
-	| relation	{ addrelation(root_dmd, $1); }
+	| entity	{ Q_addentity(root_dmd, $1); }
+	| relation	{ Q_addrelation(root_dmd, $1); }
 	| root title	{ root_dmd->title = $2; }
 	| root lib	{ root_dmd->lib = $2; }
-	| root entity	{ addentity(root_dmd, $2); }
-	| root relation	{ addrelation(root_dmd, $2); }
+	| root entity	{ Q_addentity(root_dmd, $2); }
+	| root relation	{ Q_addrelation(root_dmd, $2); }
 
 title
 	: TITLE ':' TEXT nl	{ $$ = $3; }
@@ -65,7 +59,7 @@ lib
 
 entity
 	: ENTITY ':' TEXT nl columns {
-		$$ = genentity();
+		$$ = Q_genentity();
 		$$->name = $3;
 		$$->columns = $5->columns;
 		$$->collen = $5->length;
@@ -83,12 +77,12 @@ entity
 
 entity_props
 	: TITLE ':' TEXT nl {
-		$$ = genentity();
+		$$ = Q_genentity();
 		$$->title = $3;
 	}
 	| INDEX ':' TEXT nl {
-		$$ = genentity();
-		addindex($$, $3);
+		$$ = Q_genentity();
+		Q_addindex($$, $3);
 	}
 	| entity_props TITLE ':' TEXT nl {
 		$$ = $1;
@@ -96,7 +90,7 @@ entity_props
 	}
 	| entity_props INDEX ':' TEXT nl {
 		$$ = $1;
-		addindex($$, $4);
+		Q_addindex($$, $4);
 	}
 
 columns
@@ -139,16 +133,16 @@ column_props
 
 relation
 	: RELATION ':' IDENT '.' IDENT '=' IDENT '.' IDENT NL {
-		$$ = genrelation($3, $5, $7, $9, REL_TYPE_MANY_MANY);
+		$$ = Q_genrelation($3, $5, $7, $9, REL_TYPE_MANY_MANY);
 	}
 	| RELATION ':' IDENT '.' IDENT '-' IDENT '.' IDENT NL {
-		$$ = genrelation($3, $5, $7, $9, REL_TYPE_ONE_ONE);
+		$$ = Q_genrelation($3, $5, $7, $9, REL_TYPE_ONE_ONE);
 	}
 	| RELATION ':' IDENT '.' IDENT '<' '=' IDENT '.' IDENT NL {
-		$$ = genrelation($3, $5, $8, $10, REL_TYPE_ONE_MANY);
+		$$ = Q_genrelation($3, $5, $8, $10, REL_TYPE_ONE_MANY);
 	}
 	| RELATION ':' IDENT '.' IDENT '=' '>' IDENT '.' IDENT NL {
-		$$ = genrelation($3, $5, $8, $10, REL_TYPE_MANY_ONE);
+		$$ = Q_genrelation($3, $5, $8, $10, REL_TYPE_MANY_ONE);
 	}
 
 nl
@@ -159,89 +153,6 @@ nl
 	
 
 %%
-
-static Q_entity_t *genentity(void)
-{
-	Q_entity_t *ent;
-	ent = smalloc(sizeof(Q_entity_t));
-
-	ent->name = 0;
-	ent->title = 0;
-	ent->columns = 0;
-	ent->collen = 0;
-	ent->colsize = 0;
-	ent->indices = 0;
-	ent->idxlen = 0;
-	ent->idxsize = 0;
-
-	return ent;
-}
-
-static void addentity(Q_dmd_t *dmd, Q_entity_t *entity)
-{
-	if (!dmd->entities) {
-		dmd->entsize = 16;
-		dmd->entities = smalloc(sizeof(Q_entity_t *) * dmd->entsize);
-		dmd->entlen = 0;
-	}
-
-	dmd->entities[dmd->entlen++] = entity;
-
-	if (dmd->entsize == dmd->entlen) {
-		dmd->entsize *= 2;
-		dmd->entities = srealloc(dmd->entities,
-					 sizeof(Q_entity_t *) * dmd->entsize);
-	}
-}
-
-static Q_relation_t *genrelation(char *atab, char *acol,
-				  char *btab, char *bcol,
-				  enum rel_type_e type)
-{
-	Q_relation_t *rel;
-
-	rel = smalloc(sizeof(Q_relation_t));
-	rel->atab = atab;
-	rel->acol = acol;
-	rel->btab = btab;
-	rel->bcol = bcol;
-	rel->type = type;
-
-	return rel;
-}
-static void addrelation(Q_dmd_t *dmd, Q_relation_t *relation)
-{
-	if (!dmd->relations) {
-		dmd->relsize = 16;
-		dmd->relations = smalloc(sizeof(Q_relation_t *) * dmd->relsize);
-		dmd->rellen = 0;
-	}
-
-	dmd->relations[dmd->rellen++] = relation;
-
-	if (dmd->relsize == dmd->rellen) {
-		dmd->relsize *= 2;
-		dmd->relations = srealloc(dmd->relations,
-					  sizeof(Q_relation_t *) * dmd->relsize);
-	}
-}
-
-static void addindex(Q_entity_t *ent, char *index)
-{
-	if (!ent->indices) {
-		ent->idxsize = 16;
-		ent->indices = smalloc(sizeof(char *) * ent->idxsize);
-		ent->idxlen = 0;
-	}
-
-	ent->indices[ent->idxlen++] = index;
-
-	if (ent->idxsize == ent->idxlen) {
-		ent->idxsize *= 2;
-		ent->indices = srealloc(ent->indices,
-					sizeof(char *) * ent->idxsize);
-	}
-}
 
 static Q_dmd_t *parse(FILE *fp)
 {
