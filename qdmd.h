@@ -2,7 +2,7 @@
 #define _H_QDMD_ 1
 
 #define PROGRAM_NAME "qdmd"
-#define PROGRAM_VERSION "0.7.2"
+#define PROGRAM_VERSION "0.7.3"
 
 typedef struct {
 	char *name;
@@ -57,8 +57,7 @@ typedef struct {
 	int relsize;
 } Q_dmd_t;
 
-void Q_setfilename(char *fname);
-void Q_free(Q_dmd_t *dmd);
 Q_dmd_t *Q_parsefile(char *fname);
+void Q_free(Q_dmd_t *dmd);
 
 #endif
