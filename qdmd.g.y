@@ -69,6 +69,7 @@ entity
 		$$->name = $3;
 		$$->columns = $5->columns;
 		$$->collen = $5->length;
+		$$->colsize = $5->size;
 		free($5);
 	}
 	| ENTITY ':' TEXT nl entity_props columns {
@@ -76,6 +77,7 @@ entity
 		$$->name = $3;
 		$$->columns = $6->columns;
 		$$->collen = $6->length;
+		$$->colsize = $6->size;
 		free($6);
 	}
 
@@ -100,13 +102,19 @@ entity_props
 columns
 	: column {
 		$$ = smalloc(sizeof(Q_columns_t));
-		$$->columns = smalloc(sizeof(Q_column_t *) * 64);
+		$$->size = 16;
+		$$->columns = smalloc(sizeof(Q_column_t *) * $$->size);
 		$$->length = 0;
 		$$->columns[$$->length++] = $1;
 	}
 	| columns column {
 		$$ = $1;
 		$$->columns[$$->length++] = $2;
+		if ($$->size == $$->length) {
+			$$->size *= 2;
+			$$->columns = srealloc($$->columns,
+					       sizeof(Q_column_t *) * $$->size);
+		}
 	}
 
 column
@@ -161,8 +169,10 @@ static Q_entity_t *genentity(void)
 	ent->title = 0;
 	ent->columns = 0;
 	ent->collen = 0;
+	ent->colsize = 0;
 	ent->indices = 0;
 	ent->idxlen = 0;
+	ent->idxsize = 0;
 
 	return ent;
 }
@@ -170,11 +180,18 @@ static Q_entity_t *genentity(void)
 static void addentity(Q_dmd_t *dmd, Q_entity_t *entity)
 {
 	if (!dmd->entities) {
-		dmd->entities = smalloc(sizeof(Q_entity_t *) * 64);
+		dmd->entsize = 16;
+		dmd->entities = smalloc(sizeof(Q_entity_t *) * dmd->entsize);
 		dmd->entlen = 0;
 	}
 
 	dmd->entities[dmd->entlen++] = entity;
+
+	if (dmd->entsize == dmd->entlen) {
+		dmd->entsize *= 2;
+		dmd->entities = srealloc(dmd->entities,
+					 sizeof(Q_entity_t *) * dmd->entsize);
+	}
 }
 
 static Q_relation_t *genrelation(char *atab, char *acol,
@@ -195,21 +212,35 @@ static Q_relation_t *genrelation(char *atab, char *acol,
 static void addrelation(Q_dmd_t *dmd, Q_relation_t *relation)
 {
 	if (!dmd->relations) {
-		dmd->relations = smalloc(sizeof(Q_relation_t *) * 64);
+		dmd->relsize = 16;
+		dmd->relations = smalloc(sizeof(Q_relation_t *) * dmd->relsize);
 		dmd->rellen = 0;
 	}
 
 	dmd->relations[dmd->rellen++] = relation;
+
+	if (dmd->relsize == dmd->rellen) {
+		dmd->relsize *= 2;
+		dmd->relations = srealloc(dmd->relations,
+					  sizeof(Q_relation_t *) * dmd->relsize);
+	}
 }
 
 static void addindex(Q_entity_t *ent, char *index)
 {
 	if (!ent->indices) {
-		ent->indices = smalloc(sizeof(char *) * 16);
+		ent->idxsize = 16;
+		ent->indices = smalloc(sizeof(char *) * ent->idxsize);
 		ent->idxlen = 0;
 	}
 
 	ent->indices[ent->idxlen++] = index;
+
+	if (ent->idxsize == ent->idxlen) {
+		ent->idxsize *= 2;
+		ent->indices = srealloc(ent->indices,
+					sizeof(char *) * ent->idxsize);
+	}
 }
 
 static Q_dmd_t *parse(FILE *fp)

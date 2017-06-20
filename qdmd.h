@@ -2,7 +2,7 @@
 #define _H_QDMD_ 1
 
 #define PROGRAM_NAME "qdmd"
-#define PROGRAM_VERSION "0.7.1"
+#define PROGRAM_VERSION "0.7.2"
 
 typedef struct {
 	char *name;
@@ -13,6 +13,7 @@ typedef struct {
 typedef struct {
 	Q_column_t **columns;
 	int length;
+	int size;
 } Q_columns_t;
 
 typedef struct {
@@ -20,8 +21,10 @@ typedef struct {
 	char *title;
 	Q_column_t **columns;
 	int collen;
+	int colsize;
 	char **indices;
 	int idxlen;
+	int idxsize;
 } Q_entity_t;
 
 #define REL_TYPE_A_ONE 1
@@ -48,8 +51,10 @@ typedef struct {
 	char *lib;
 	Q_entity_t **entities;
 	int entlen;
+	int entsize;
 	Q_relation_t **relations;
 	int rellen;
+	int relsize;
 } Q_dmd_t;
 
 void Q_setfilename(char *fname);
