@@ -6,7 +6,7 @@
 %}
 
 %option stack
-%x XENTITY XREL XTEXT
+%x XENTITY XREL XIDENT XTEXT
 
 comm	"#"[^\n]*[\n]
 ident	[a-zA-Z_][a-zA-Z0-9_]*
@@ -26,15 +26,26 @@ nl	(\r?\n)+
 	"ENTITY"	{ return ENTITY; }
 	"TITLE"		{ return TITLE; }
 	"INDEX"		{ return INDEX; }
+	"UIFORM"	{ return UIFORM; }
+	"UIGRID"	{ return UIGRID; }
 	"COLUMN"	{ return COLUMN; }
 	"TYPE"		{ return TYPE; }
 	"RELATION"	{ yy_push_state(XREL); return RELATION; }
+	"."		{ yy_push_state(XIDENT); return yytext[0]; }
 }
 
 <XREL>{
 	":"		{ return yytext[0]; }
 	{ident}		{ yylval.str = sstrdup(yytext); return IDENT; }
 	{nl}		{ yy_push_state(INITIAL); return NL; }
+}
+
+<XIDENT>{
+	{ident}		{
+		yylval.str = sstrdup(yytext);
+		yy_pop_state();
+		return IDENT;
+	}
 }
 
 <XTEXT>{

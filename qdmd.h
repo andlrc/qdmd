@@ -2,12 +2,23 @@
 #define _H_QDMD_ 1
 
 #define PROGRAM_NAME "qdmd"
-#define PROGRAM_VERSION "0.7.4"
+#define PROGRAM_VERSION "0.8.0"
+
+struct Q_kv {
+	char *key;
+	char *value;
+};
 
 typedef struct {
 	char *name;
 	char *type;
 	char *title;
+	struct Q_kv **uiform;
+	int uiformlen;
+	int uiformsize;
+	struct Q_kv **uigrid;
+	int uigridlen;
+	int uigridsize;
 } Q_column_t;
 
 typedef struct {
@@ -60,13 +71,17 @@ typedef struct {
 Q_dmd_t *Q_parsefile(char *fname);
 
 Q_entity_t *Q_genentity(void);
-
 void Q_addentity(Q_dmd_t * dmd, Q_entity_t * entity);
-void Q_addindex(Q_entity_t * ent, char *index);
 
 Q_relation_t *Q_genrelation(char *atab, char *acol,
 			    char *btab, char *bcol, enum rel_type_e type);
 void Q_addrelation(Q_dmd_t * dmd, Q_relation_t * relation);
+
+Q_column_t *Q_gencolumn(void);
+
+void Q_addkv(struct Q_kv ***kv, char *key, char *value, int *size, int *len);
+
+void Q_addindex(Q_entity_t * ent, char *index);
 
 void Q_free(Q_dmd_t * dmd);
 

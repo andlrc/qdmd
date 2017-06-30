@@ -148,7 +148,8 @@ static void print_dmd(FILE * fp, Q_dmd_t * dmd)
 	Q_entity_t *ent;
 	Q_column_t *col;
 	Q_relation_t *rel;
-	int i, j, len;
+	struct Q_kv *kv;
+	int i, j, k, len;
 	char type[32];
 
 	fprintf(fp, "{\n"
@@ -174,14 +175,25 @@ static void print_dmd(FILE * fp, Q_dmd_t * dmd)
 		}
 		fprintf(fp, "\t\t\t\t],\n");
 		fprintf(fp, "\t\t\t\t\"columns\": [\n");
+		/* Print grids */
 		for (j = 0; j < ent->collen; j++) {
 			col = ent->columns[j];
 			gettyplen(type, &len, col->type);
-			fprintf(fp, "\t\t\t\t\t{\n"
-				"\t\t\t\t\t\t\"type\": \"%s\",\n"
+			strcpy(type, col->type);
+			fprintf(fp, "\t\t\t\t\t{\n");
+			for (k = 0; k < col->uigridlen; k++) {
+				kv = col->uigrid[k];
+				if (strcmp(kv->key, "type") == 0)
+					strcpy(type, kv->value);
+				else
+					fprintf(fp,
+						"\t\t\t\t\t\t\"%s\": \"%s\",\n",
+						kv->key, kv->value);
+			}
+			fprintf(fp, "\t\t\t\t\t\t\"type\": \"%s\",\n"
 				"\t\t\t\t\t\t\"name\": \"%s\",\n"
 				"\t\t\t\t\t\t\"title\": \"%s\"",
-				col->type, col->name, col->title);
+				type, col->name, col->title);
 
 			if (len) {
 				fprintf(fp, ",\n\t\t\t\t\t\t\"len\": %d\n",
@@ -229,6 +241,7 @@ static void print_dmd(FILE * fp, Q_dmd_t * dmd)
 		fprintf(fp, "\t\t\t\t\t\t\t],\n"
 			"\t\t\t\t\t\t\t\"items\": {\n"
 			"\t\t\t\t\t\t\t\t\"columns\": [\n");
+		/* Print forms */
 		for (j = 0; j < ent->collen; j++) {
 			col = ent->columns[j];
 			gettyplen(type, &len, col->type);
@@ -236,12 +249,24 @@ static void print_dmd(FILE * fp, Q_dmd_t * dmd)
 				strcpy(type, "number");
 
 			fprintf(fp, "\t\t\t\t\t\t\t\t\t{\n"
-				"\t\t\t\t\t\t\t\t\t\t\"name\": \"%s\",\n"
+				"\t\t\t\t\t\t\t\t\t\t\"name\": \"%s\",\n",
+				col->name);
+			for (k = 0; k < col->uiformlen; k++) {
+				kv = col->uiform[k];
+				if (strcmp(kv->key, "type") == 0)
+					strcpy(type, kv->value);
+				else
+					fprintf(fp,
+						"\t\t\t\t\t\t\t\t\t\t\"%s\": \"%s\",\n",
+						kv->key, kv->value);
+			}
+
+			fprintf(fp,
 				"\t\t\t\t\t\t\t\t\t\t\"type\": \"%s\",\n"
 				"\t\t\t\t\t\t\t\t\t\t\"title\": \"%s\",\n"
 				"\t\t\t\t\t\t\t\t\t\t\"anchor\": \"100%%\",\n"
 				"\t\t\t\t\t\t\t\t\t\t\"fieldLabel\": \"%s\"",
-				col->name, type, col->title, col->title);
+				type, col->title, col->title);
 
 			if (len) {
 				fprintf(fp,

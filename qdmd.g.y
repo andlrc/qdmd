@@ -28,7 +28,7 @@ static Q_dmd_t *root_dmd;
 	Q_relation_t *relation;
 }
 
-%token TITLE LIB ENTITY COLUMN TYPE RELATION INDEX
+%token TITLE LIB ENTITY COLUMN TYPE RELATION INDEX UIFORM UIGRID
 %token <str> TEXT IDENT
 %token NL
 
@@ -118,17 +118,45 @@ column
 	}
 
 column_props
-	: TYPE ':' TEXT nl TITLE ':' TEXT nl {
-		$$ = smalloc(sizeof(Q_column_t));
-
+	: TYPE ':' TEXT nl {
+		$$ = Q_gencolumn();
 		$$->type = $3;
-		$$->title = $7;
 	}
-	| TITLE ':' TEXT nl TYPE ':' TEXT nl {
-		$$ = smalloc(sizeof(Q_column_t));
-
+	| TITLE ':' TEXT nl {
+		$$ = Q_gencolumn();
 		$$->title = $3;
-		$$->type = $7;
+	}
+	| UIFORM '.' IDENT ':' TEXT nl {
+		$$ = Q_gencolumn();
+		Q_addkv(&$$->uiform, $3, $5, &$$->uiformsize, &$$->uiformlen);
+		free($3);
+		free($5);
+	}
+	| UIGRID '.' IDENT ':' TEXT nl {
+		$$ = Q_gencolumn();
+		Q_addkv(&$$->uigrid, $3, $5, &$$->uigridsize, &$$->uigridlen);
+		free($3);
+		free($5);
+	}
+	| column_props TYPE ':' TEXT nl {
+		$$ = $1;
+		$$->type = $4;
+	}
+	| column_props TITLE ':' TEXT nl {
+		$$ = $1;
+		$$->title = $4;
+	}
+	| column_props UIFORM '.' IDENT ':' TEXT nl {
+		$$ = $1;
+		Q_addkv(&$$->uiform, $4, $6, &$$->uiformsize, &$$->uiformlen);
+		free($4);
+		free($6);
+	}
+	| column_props UIGRID '.' IDENT ':' TEXT nl {
+		$$ = $1;
+		Q_addkv(&$$->uigrid, $4, $6, &$$->uigridsize, &$$->uigridlen);
+		free($4);
+		free($6);
 	}
 
 relation

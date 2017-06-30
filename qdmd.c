@@ -71,6 +71,41 @@ void Q_addrelation(Q_dmd_t * dmd, Q_relation_t * relation)
 	}
 }
 
+Q_column_t *Q_gencolumn(void)
+{
+	Q_column_t *col;
+	col = smalloc(sizeof(Q_column_t));
+
+	col->title = 0;
+	col->type = 0;
+
+	col->uiformsize = 8;
+	col->uiform = smalloc(sizeof(struct Q_kv *) * col->uiformsize);
+	col->uiformlen = 0;
+
+	col->uigridsize = 8;
+	col->uigrid = smalloc(sizeof(struct Q_kv *) * col->uigridsize);
+	col->uigridlen = 0;
+
+	return col;
+}
+
+void Q_addkv(struct Q_kv ***kv, char *key, char *value, int *size, int *len)
+{
+	struct Q_kv *pair;
+
+	pair = smalloc(sizeof(struct Q_kv));
+	pair->key = sstrdup(key);
+	pair->value = sstrdup(value);
+	(*kv)[*len] = pair;
+	*len = *len + 1;
+
+	if (*size == *len) {
+		*size = *size * 2;
+		*kv = srealloc(*kv, sizeof(struct Q_kv *) * *size);
+	}
+}
+
 void Q_addindex(Q_entity_t * ent, char *index)
 {
 	if (!ent->indices) {
@@ -93,18 +128,33 @@ void Q_free(Q_dmd_t * dmd)
 	Q_entity_t *ent;
 	Q_column_t *col;
 	Q_relation_t *rel;
-	int i, y;
+	struct Q_kv *kv;
+	int i, j, k;
 	for (i = 0; i < dmd->entlen; i++) {
 		ent = dmd->entities[i];
-		for (y = 0; y < ent->collen; y++) {
-			col = ent->columns[y];
+		for (j = 0; j < ent->collen; j++) {
+			col = ent->columns[j];
 			free(col->name);
 			free(col->type);
 			free(col->title);
+			for (k = 0; k < col->uiformlen; k++) {
+				kv = col->uiform[k];
+				free(kv->key);
+				free(kv->value);
+				free(kv);
+			}
+			free(col->uiform);
+			for (k = 0; k < col->uigridlen; k++) {
+				kv = col->uigrid[k];
+				free(kv->key);
+				free(kv->value);
+				free(kv);
+			}
+			free(col->uigrid);
 			free(col);
 		}
-		for (y = 0; y < ent->idxlen; y++) {
-			free(ent->indices[y]);
+		for (j = 0; j < ent->idxlen; j++) {
+			free(ent->indices[j]);
 		}
 		free(ent->indices);
 		free(ent->name);

@@ -44,6 +44,8 @@ TITLE:	CSM Step Entity
 	TYPE:	integer
 	TITLE:	CSM Status
 	COLUMN:	STPPROP
+	UIFORM.type:	acetextarea
+	UIFORM.height:	500
 	TYPE:	varchar(16384)
 	TITLE:	CSM Step Properties
 RELATION:	CSMSTPET00.STPSTGTKN => CSMSTGET00.STGSTGTKN
