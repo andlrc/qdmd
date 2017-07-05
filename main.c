@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <getopt.h>
 #include <limits.h>
+#include <ctype.h>
 #include "qdmd.h"
 #include "y.tab.h"
 
@@ -143,6 +144,25 @@ static int gettyplen(char *type, int *len, char *enttype)
 	return 0;
 }
 
+static int isnum(char *value)
+{
+	while (isdigit(*value))
+		value++;
+
+	return *value ? 0 : 1;
+}
+
+static void print_prop(FILE * fp, char *indent, char *key, char *value)
+{
+	if (isnum(value)) {
+		fprintf(fp, "%s\"%s\": %s,\n",
+			indent, key, value);
+	} else {
+		fprintf(fp, "%s\"%s\": \"%s\",\n",
+			indent, key, value);
+	}
+}
+
 static void print_dmd(FILE * fp, Q_dmd_t * dmd)
 {
 	Q_entity_t *ent;
@@ -186,9 +206,8 @@ static void print_dmd(FILE * fp, Q_dmd_t * dmd)
 				if (strcmp(kv->key, "type") == 0)
 					strcpy(type, kv->value);
 				else
-					fprintf(fp,
-						"\t\t\t\t\t\t\"%s\": \"%s\",\n",
-						kv->key, kv->value);
+					print_prop(fp, "\t\t\t\t\t\t",
+						   kv->key, kv->value);
 			}
 			fprintf(fp, "\t\t\t\t\t\t\"type\": \"%s\",\n"
 				"\t\t\t\t\t\t\"name\": \"%s\",\n"
@@ -256,9 +275,8 @@ static void print_dmd(FILE * fp, Q_dmd_t * dmd)
 				if (strcmp(kv->key, "type") == 0)
 					strcpy(type, kv->value);
 				else
-					fprintf(fp,
-						"\t\t\t\t\t\t\t\t\t\t\"%s\": \"%s\",\n",
-						kv->key, kv->value);
+					print_prop(fp, "\t\t\t\t\t\t\t\t\t\t",
+						   kv->key, kv->value);
 			}
 
 			fprintf(fp,
