@@ -160,16 +160,16 @@ column_props
 	}
 
 relation
-	: RELATION ':' IDENT '.' IDENT '=' IDENT '.' IDENT NL {
+	: RELATION ':' IDENT '.' IDENT '=' IDENT '.' IDENT nl {
 		$$ = Q_genrelation($3, $5, $7, $9, REL_TYPE_MANY_MANY);
 	}
-	| RELATION ':' IDENT '.' IDENT '-' IDENT '.' IDENT NL {
+	| RELATION ':' IDENT '.' IDENT '-' IDENT '.' IDENT nl {
 		$$ = Q_genrelation($3, $5, $7, $9, REL_TYPE_ONE_ONE);
 	}
-	| RELATION ':' IDENT '.' IDENT '<' '=' IDENT '.' IDENT NL {
+	| RELATION ':' IDENT '.' IDENT '<' '=' IDENT '.' IDENT nl {
 		$$ = Q_genrelation($3, $5, $8, $10, REL_TYPE_ONE_MANY);
 	}
-	| RELATION ':' IDENT '.' IDENT '=' '>' IDENT '.' IDENT NL {
+	| RELATION ':' IDENT '.' IDENT '=' '>' IDENT '.' IDENT nl {
 		$$ = Q_genrelation($3, $5, $8, $10, REL_TYPE_MANY_ONE);
 	}
 

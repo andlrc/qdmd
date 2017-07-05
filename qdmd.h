@@ -2,7 +2,7 @@
 #define _H_QDMD_ 1
 
 #define PROGRAM_NAME "qdmd"
-#define PROGRAM_VERSION "0.8.0"
+#define PROGRAM_VERSION "0.8.1"
 
 struct Q_kv {
 	char *key;

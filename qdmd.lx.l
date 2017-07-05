@@ -37,7 +37,7 @@ nl	(\r?\n)+
 <XREL>{
 	":"		{ return yytext[0]; }
 	{ident}		{ yylval.str = sstrdup(yytext); return IDENT; }
-	{nl}		{ yy_push_state(INITIAL); return NL; }
+	{nl}		{ yy_pop_state(); return NL; }
 }
 
 <XIDENT>{
