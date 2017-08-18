@@ -171,6 +171,9 @@ static void print_dmd(FILE * fp, Q_dmd_t * dmd)
 	struct Q_kv *kv;
 	int i, j, k, len;
 	char type[32];
+	char *coltitle;
+
+	/* Prettified JSON FTW */
 
 	fprintf(fp, "{\n"
 		"\t\"model\": {\n"
@@ -180,9 +183,8 @@ static void print_dmd(FILE * fp, Q_dmd_t * dmd)
 	for (i = 0; i < dmd->entlen; i++) {
 		ent = dmd->entities[i];
 		fprintf(fp, "\t\t\t\"%s\": {\n", ent->name);
-		if (ent->title)
-			fprintf(fp, "\t\t\t\t\"title\": \"%s\",\n",
-				ent->title);
+		fprintf(fp, "\t\t\t\t\"title\": \"%s\",\n",
+			ent->title ? ent->title : ent->name);
 		fprintf(fp, "\t\t\t\t\"keys\": [\n");
 		for (j = 0; j < ent->idxlen; j++) {
 			fprintf(fp, "\t\t\t\t\t{\n"
@@ -200,6 +202,7 @@ static void print_dmd(FILE * fp, Q_dmd_t * dmd)
 			col = ent->columns[j];
 			gettyplen(type, &len, col->type);
 			strcpy(type, col->type);
+			coltitle = col->title ? col->title : col->name;
 			fprintf(fp, "\t\t\t\t\t{\n");
 			for (k = 0; k < col->uigridlen; k++) {
 				kv = col->uigrid[k];
@@ -212,7 +215,8 @@ static void print_dmd(FILE * fp, Q_dmd_t * dmd)
 			fprintf(fp, "\t\t\t\t\t\t\"type\": \"%s\",\n"
 				"\t\t\t\t\t\t\"name\": \"%s\",\n"
 				"\t\t\t\t\t\t\"title\": \"%s\"",
-				type, col->name, col->title);
+				type, col->name,
+				coltitle);
 
 			if (len) {
 				fprintf(fp, ",\n\t\t\t\t\t\t\"len\": %d\n",
@@ -233,6 +237,7 @@ static void print_dmd(FILE * fp, Q_dmd_t * dmd)
 			"\t\t\t\t\t\t\t\"columns\": [\n");
 		for (j = 0; j < ent->collen; j++) {
 			col = ent->columns[j];
+			coltitle = col->title ? col->title : col->name;
 			fprintf(fp, "\t\t\t\t\t\t\t\t{\n");
 			fprintf(fp, "\t\t\t\t\t\t\t\t\t\"name\": \"%s\",\n"
 				"\t\t\t\t\t\t\t\t\t\"title\": \"%s\",\n"
@@ -241,7 +246,8 @@ static void print_dmd(FILE * fp, Q_dmd_t * dmd)
 				"\t\t\t\t\t\t\t\t\t\"flex\": 1,\n"
 				"\t\t\t\t\t\t\t\t\t\"isTitle\": false\n"
 				"\t\t\t\t\t\t\t\t}%s\n",
-				col->name, col->title,
+				col->name,
+				coltitle,
 				j + 1 < ent->collen ? "," : "");
 		}
 		fprintf(fp, "\t\t\t\t\t\t\t]\n"
@@ -264,6 +270,7 @@ static void print_dmd(FILE * fp, Q_dmd_t * dmd)
 		for (j = 0; j < ent->collen; j++) {
 			col = ent->columns[j];
 			gettyplen(type, &len, col->type);
+			coltitle = col->title ? col->title : col->name;
 			if (strcmp(type, "integer") == 0)
 				strcpy(type, "number");
 
@@ -284,7 +291,8 @@ static void print_dmd(FILE * fp, Q_dmd_t * dmd)
 				"\t\t\t\t\t\t\t\t\t\t\"title\": \"%s\",\n"
 				"\t\t\t\t\t\t\t\t\t\t\"anchor\": \"100%%\",\n"
 				"\t\t\t\t\t\t\t\t\t\t\"fieldLabel\": \"%s\"",
-				type, col->title, col->title);
+				type, coltitle,
+				coltitle);
 
 			if (len) {
 				fprintf(fp,

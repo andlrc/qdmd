@@ -76,6 +76,7 @@ Q_column_t *Q_gencolumn(void)
 	Q_column_t *col;
 	col = smalloc(sizeof(Q_column_t));
 
+	col->name = 0;
 	col->title = 0;
 	col->type = 0;
 
