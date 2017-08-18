@@ -163,6 +163,26 @@ static void print_prop(FILE * fp, char *indent, char *key, char *value)
 	}
 }
 
+static void print_values(FILE * fp, char *indent, Q_column_t *col)
+{
+	int i;
+	struct Q_kv *kv;
+	char iindent[64];
+
+	snprintf(iindent, sizeof(iindent), "\t\t%s", indent);
+
+	fprintf(fp, "%s\"values\": [\n", indent);
+	for (i = 0; i < col->valueslen; i++) {
+		kv = col->values[i];
+		fprintf(fp, "\t%s{\n", indent);
+		print_prop(fp, iindent, "key", kv->key);
+		fprintf(fp, "%s\"name\": \"%s\"\n", iindent, kv->value);
+		fprintf(fp, "\t%s}%s\n", indent,
+			i + 1 < col->valueslen ? "," : "");
+	}
+	fprintf(fp, "%s],\n", indent);
+}
+
 static void print_dmd(FILE * fp, Q_dmd_t * dmd)
 {
 	Q_entity_t *ent;
@@ -284,6 +304,10 @@ static void print_dmd(FILE * fp, Q_dmd_t * dmd)
 				else
 					print_prop(fp, "\t\t\t\t\t\t\t\t\t\t",
 						   kv->key, kv->value);
+			}
+			if (col->valueslen) {
+				print_values(fp, "\t\t\t\t\t\t\t\t\t\t", col);
+				strcpy(type, "picker");
 			}
 
 			fprintf(fp,

@@ -30,6 +30,7 @@ nl	(\r?\n)+
 	"UIGRID"	{ return UIGRID; }
 	"COLUMN"	{ return COLUMN; }
 	"TYPE"		{ return TYPE; }
+	"VALUES"	{ return VALUES; }
 	"RELATION"	{ yy_push_state(XREL); return RELATION; }
 	"."		{ yy_push_state(XIDENT); return yytext[0]; }
 }

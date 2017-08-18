@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <string.h>
 #include "safe.h"
 #include "qdmd.h"
 
@@ -88,6 +89,10 @@ Q_column_t *Q_gencolumn(void)
 	col->uigrid = smalloc(sizeof(struct Q_kv *) * col->uigridsize);
 	col->uigridlen = 0;
 
+	col->valuessize = 8;
+	col->values = smalloc(sizeof(struct Q_kv *) * col->valuessize);
+	col->valueslen = 0;
+
 	return col;
 }
 
@@ -104,6 +109,20 @@ void Q_addkv(struct Q_kv ***kv, char *key, char *value, int *size, int *len)
 	if (*size == *len) {
 		*size = *size * 2;
 		*kv = srealloc(*kv, sizeof(struct Q_kv *) * *size);
+	}
+}
+
+void Q_addvalues(Q_column_t *col, char *values)
+{
+	/* values is a string like: key1:val1,key2:val2 */
+	char *kv, *key, *val;
+
+	while ((kv = strsep(&values, ","))) {
+		key = strsep(&kv, ":");
+		val = kv;
+
+		Q_addkv(&col->values, key, val,
+			&col->valuessize, &col->valueslen);
 	}
 }
 
@@ -152,6 +171,13 @@ void Q_free(Q_dmd_t * dmd)
 				free(kv);
 			}
 			free(col->uigrid);
+			for (k = 0; k < col->valueslen; k++) {
+				kv = col->values[k];
+				free(kv->key);
+				free(kv->value);
+				free(kv);
+			}
+			free(col->values);
 			free(col);
 		}
 		for (j = 0; j < ent->idxlen; j++) {

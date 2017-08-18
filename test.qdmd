@@ -50,6 +50,7 @@ INDEX:	STPSTPTKN,STPDEPAFT
 	COLUMN:	STPSTS
 	TYPE:	integer
 	TITLE:	CSM Status
+	VALUES: 0:Idle,20:Active,50:Completed
 	COLUMN:	STPPROP
 	TYPE:	varchar(16384)
 	TITLE:	CSM Step Properties

@@ -19,6 +19,9 @@ typedef struct {
 	struct Q_kv **uigrid;
 	int uigridlen;
 	int uigridsize;
+	struct Q_kv **values;
+	int valueslen;
+	int valuessize;
 } Q_column_t;
 
 typedef struct {
@@ -80,6 +83,8 @@ void Q_addrelation(Q_dmd_t * dmd, Q_relation_t * relation);
 Q_column_t *Q_gencolumn(void);
 
 void Q_addkv(struct Q_kv ***kv, char *key, char *value, int *size, int *len);
+
+void Q_addvalues(Q_column_t *col, char *values);
 
 void Q_addindex(Q_entity_t * ent, char *index);
 

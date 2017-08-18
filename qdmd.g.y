@@ -28,7 +28,7 @@ static Q_dmd_t *root_dmd;
 	Q_relation_t *relation;
 }
 
-%token TITLE LIB ENTITY COLUMN TYPE RELATION INDEX UIFORM UIGRID
+%token TITLE LIB ENTITY COLUMN TYPE RELATION INDEX UIFORM UIGRID VALUES
 %token <str> TEXT IDENT
 %token NL
 
@@ -138,6 +138,10 @@ column_props
 		free($3);
 		free($5);
 	}
+	| VALUES ':' TEXT nl {
+		$$ = Q_gencolumn();
+		Q_addvalues($$, $3);
+	}
 	| column_props TYPE ':' TEXT nl {
 		$$ = $1;
 		$$->type = $4;
@@ -157,6 +161,10 @@ column_props
 		Q_addkv(&$$->uigrid, $4, $6, &$$->uigridsize, &$$->uigridlen);
 		free($4);
 		free($6);
+	}
+	| column_props VALUES ':' TEXT nl {
+		$$ = $1;
+		Q_addvalues($$, $4);
 	}
 
 relation
