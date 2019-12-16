@@ -62,7 +62,6 @@ typedef struct {
 
 typedef struct {
 	char *title;
-	char *lib;
 	Q_entity_t **entities;
 	int entlen;
 	int entsize;

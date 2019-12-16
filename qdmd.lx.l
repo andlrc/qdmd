@@ -18,7 +18,6 @@ nl	(\r?\n)+
 
 <INITIAL>{
 	"TITLE"		{ return TITLE; }
-	"LIB"		{ return LIB; }
 	"ENTITY"	{ yy_push_state(XENTITY); return ENTITY; }
 }
 

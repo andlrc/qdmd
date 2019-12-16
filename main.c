@@ -396,10 +396,9 @@ static void print_dmd(FILE * fp, Q_dmd_t * dmd)
 		"\t\t},\n"
 		"\t\t\"designer\": {\n"
 		"\t\t},\n"
-		"\t\t\"name\": \"%s\",\n"
 		"\t\t\"title\": {\n"
 		"\t\t\t\"da\": \"%s\"\n"
 		"\t\t},\n"
 		"\t\t\"require\": [\n"
-		"\t\t]\n" "\t}\n" "}\n", dmd->lib, dmd->title);
+		"\t\t]\n" "\t}\n" "}\n", dmd->title);
 }

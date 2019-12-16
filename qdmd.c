@@ -198,7 +198,6 @@ void Q_free(Q_dmd_t * dmd)
 		free(rel);
 	}
 	free(dmd->title);
-	free(dmd->lib);
 	free(dmd->entities);
 	free(dmd->relations);
 	free(dmd);

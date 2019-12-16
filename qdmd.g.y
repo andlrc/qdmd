@@ -28,11 +28,11 @@ static Q_dmd_t *root_dmd;
 	Q_relation_t *relation;
 }
 
-%token TITLE LIB ENTITY COLUMN TYPE RELATION INDEX UIFORM UIGRID VALUES
+%token TITLE ENTITY COLUMN TYPE RELATION INDEX UIFORM UIGRID VALUES
 %token <str> TEXT IDENT
 %token NL
 
-%type <str> title lib
+%type <str> title
 %type <entity> entity entity_props
 %type <columns> columns
 %type <column> column column_props
@@ -43,19 +43,14 @@ static Q_dmd_t *root_dmd;
 root
 	: nl root	/* Ignore */
 	| title		{ root_dmd->title = $1; }
-	| lib		{ root_dmd->lib = $1; }
 	| entity	{ Q_addentity(root_dmd, $1); }
 	| relation	{ Q_addrelation(root_dmd, $1); }
 	| root title	{ root_dmd->title = $2; }
-	| root lib	{ root_dmd->lib = $2; }
 	| root entity	{ Q_addentity(root_dmd, $2); }
 	| root relation	{ Q_addrelation(root_dmd, $2); }
 
 title
 	: TITLE ':' TEXT nl	{ $$ = $3; }
-
-lib
-	: LIB ':' TEXT nl	{ $$ = $3; }
 
 entity
 	: ENTITY ':' TEXT nl columns {
@@ -194,7 +189,6 @@ static Q_dmd_t *parse(FILE *fp)
 {
 	root_dmd = smalloc(sizeof(Q_dmd_t));
 	root_dmd->title = 0;
-	root_dmd->lib = 0;
 	root_dmd->entities = 0;
 	root_dmd->entlen = 0;
 	root_dmd->relations = 0;
